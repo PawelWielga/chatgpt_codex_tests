@@ -10,8 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const deck = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
         deck.forEach(sym => {
             const btn = document.createElement('button');
-            btn.className = 'btn btn-light';
+            btn.className = 'memo-card';
             btn.dataset.sym = sym;
+            btn.innerHTML = `<div class="memo-card-inner">` +
+                            `<div class="memo-card-front">${sym}</div>` +
+                            `<div class="memo-card-back"></div>` +
+                            `</div>`;
             btn.addEventListener('click', () => handleClick(btn));
             board.appendChild(btn);
         });
@@ -20,25 +24,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleClick(btn) {
-        if (lock || btn.disabled || btn === firstCard) return;
-        btn.textContent = btn.dataset.sym;
+        if (lock || btn.dataset.matched === 'true' || btn === firstCard) return;
+        btn.classList.add('flipped');
         if (!firstCard) {
             firstCard = btn;
             return;
         }
         lock = true;
         if (btn.dataset.sym === firstCard.dataset.sym) {
-            btn.disabled = true;
-            firstCard.disabled = true;
-            firstCard = null;
-            lock = false;
-            if ([...board.children].every(b => b.disabled)) {
-                setTimeout(() => alert('Wygrana!'), 300);
-            }
+            btn.dataset.matched = 'true';
+            firstCard.dataset.matched = 'true';
+            setTimeout(() => {
+                btn.classList.add('matched');
+                firstCard.classList.add('matched');
+                btn.disabled = true;
+                firstCard.disabled = true;
+                firstCard = null;
+                lock = false;
+                if ([...board.querySelectorAll('.memo-card')].every(b => b.dataset.matched === 'true')) {
+                    setTimeout(() => alert('Wygrana!'), 300);
+                }
+            }, 600);
         } else {
             setTimeout(() => {
-                btn.textContent = '';
-                firstCard.textContent = '';
+                btn.classList.remove('flipped');
+                firstCard.classList.remove('flipped');
                 firstCard = null;
                 lock = false;
             }, 700);
