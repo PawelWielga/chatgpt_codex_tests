@@ -1,9 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('life-board');
     const startBtn = document.getElementById('life-start');
-    const attackInput = document.getElementById('stat-attack');
-    const defenseInput = document.getElementById('stat-defense');
-    const speedInput = document.getElementById('stat-speed');
+    const statDisplays = {
+        attack: document.getElementById('stat-attack'),
+        defense: document.getElementById('stat-defense'),
+        speed: document.getElementById('stat-speed')
+    };
+    const stats = {attack: 0, defense: 0, speed: 0};
+    const maxStat = 5;
+    const totalPoints = 10;
     const remainingSpan = document.getElementById('points-remaining');
     const size = 20;
     let cells = [];
@@ -24,14 +29,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function updateRemaining() {
-        const total = +attackInput.value + +defenseInput.value + +speedInput.value;
-        remainingSpan.textContent = 10 - total;
+    function updateDisplays() {
+        Object.keys(statDisplays).forEach(key => {
+            const display = statDisplays[key];
+            display.innerHTML = '';
+            for (let i = 0; i < maxStat; i++) {
+                const span = document.createElement('span');
+                span.textContent = i < stats[key] ? '🔴' : '⚪';
+                span.className = i < stats[key] ? 'filled' : 'empty';
+                display.appendChild(span);
+            }
+        });
+        const total = stats.attack + stats.defense + stats.speed;
+        remainingSpan.textContent = totalPoints - total;
     }
 
-    attackInput.addEventListener('input', updateRemaining);
-    defenseInput.addEventListener('input', updateRemaining);
-    speedInput.addEventListener('input', updateRemaining);
+    document.querySelectorAll('.stat-inc').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const stat = btn.dataset.stat;
+            const total = stats.attack + stats.defense + stats.speed;
+            if (total < totalPoints && stats[stat] < maxStat) {
+                stats[stat]++;
+                updateDisplays();
+            }
+        });
+    });
+
+    document.querySelectorAll('.stat-dec').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const stat = btn.dataset.stat;
+            if (stats[stat] > 0) {
+                stats[stat]--;
+                updateDisplays();
+            }
+        });
+    });
 
     function randomStats() {
         let points = 10;
@@ -98,8 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     startBtn.addEventListener('click', () => {
-        const total = +attackInput.value + +defenseInput.value + +speedInput.value;
-        if (total > 10) {
+        const total = stats.attack + stats.defense + stats.speed;
+        if (total > totalPoints) {
             alert('Za dużo punktów!');
             return;
         }
@@ -109,9 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const player = {
             x: Math.floor(Math.random() * size),
             y: Math.floor(Math.random() * size),
-            attack: +attackInput.value,
-            defense: +defenseInput.value,
-            speed: +speedInput.value,
+            attack: stats.attack,
+            defense: stats.defense,
+            speed: stats.speed,
             isPlayer: true
         };
         microbes.push(player);
@@ -131,5 +163,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     createBoard();
-    updateRemaining();
+    updateDisplays();
 });
