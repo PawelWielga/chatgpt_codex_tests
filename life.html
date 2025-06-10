@@ -12,11 +12,26 @@
 <body>
     <div class="container py-5">
         <h1 class="text-center mb-4">Gra w życie</h1>
+        <div id="life-config" class="mb-4">
+            <p>Pozostało punktów: <span id="points-remaining">10</span></p>
+            <div class="row g-2">
+                <div class="col">
+                    <label for="stat-attack" class="form-label">Atak</label>
+                    <input type="number" id="stat-attack" class="form-control" value="3" min="0" max="10">
+                </div>
+                <div class="col">
+                    <label for="stat-defense" class="form-label">Obrona</label>
+                    <input type="number" id="stat-defense" class="form-control" value="3" min="0" max="10">
+                </div>
+                <div class="col">
+                    <label for="stat-speed" class="form-label">Szybkość</label>
+                    <input type="number" id="stat-speed" class="form-control" value="4" min="0" max="10">
+                </div>
+            </div>
+        </div>
         <div id="life-board" class="mx-auto mb-3"></div>
         <div class="text-center">
             <button id="life-start" class="btn btn-success">Start</button>
-            <button id="life-stop" class="btn btn-warning ms-2">Stop</button>
-            <button id="life-random" class="btn btn-primary ms-2">Losuj</button>
             <a href="index.html" class="btn btn-secondary ms-2">Powrót</a>
         </div>
     </div>
