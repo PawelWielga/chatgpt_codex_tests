@@ -4,3 +4,5 @@ This repository contains a minimal demo of a browser game collection. Open `inde
 
 * **Kółko i Krzyżyk** (`tictactoe.html`) – gra przeciwko prostemu komputerowi.
 * **Memo – gra w pary** (`memo.html`) – odsłanianie kart i łączenie tych samych symboli.
+
+* **Kostka 3D** (`cube.html`) – obrotowa kostka z biblioteki three.js.
