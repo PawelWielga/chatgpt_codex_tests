@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('board');
     const resetBtn = document.getElementById('reset');
+    const status = document.getElementById('ttt-status');
     const human = '❌';
     const ai = '⭕';
-    let current = human;
+    let startPlayer = human;
+    let current = startPlayer;
     let gameOver = false;
     const cells = [];
 
@@ -23,6 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
             board.appendChild(btn);
             cells.push(btn);
         }
+        status.textContent = '';
+        if (current === ai) {
+            status.textContent = 'Ruch komputera...';
+            setTimeout(computerMove, 300);
+        }
     }
 
     function handleMove(index) {
@@ -30,16 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameOver || cell.dataset.value || current !== human) return;
         makeMove(cell, human);
         if (checkWin()) {
-            alert(`Wygrał ${human}!`);
+            status.textContent = `Wygrał ${human}!`;
             gameOver = true;
             return;
         }
         if (cells.every(c => c.dataset.value)) {
-            alert('Remis!');
+            status.textContent = 'Remis!';
             gameOver = true;
             return;
         }
         current = ai;
+        status.textContent = 'Ruch komputera...';
         setTimeout(computerMove, 300);
     }
 
@@ -55,16 +63,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const cell = cells[index];
         makeMove(cell, ai);
         if (checkWin()) {
-            alert(`Wygrał ${ai}!`);
+            status.textContent = `Wygrał ${ai}!`;
             gameOver = true;
             return;
         }
         if (cells.every(c => c.dataset.value)) {
-            alert('Remis!');
+            status.textContent = 'Remis!';
             gameOver = true;
             return;
         }
         current = human;
+        status.textContent = '';
     }
 
     function checkWin() {
@@ -83,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function makeMove(cell, symbol) {
         const front = cell.querySelector('.ttt-card-front');
         front.textContent = symbol;
+        front.classList.add(symbol === human ? 'ttt-x' : 'ttt-o');
         cell.dataset.value = symbol;
         cell.classList.add('flipped');
         cell.disabled = true;
@@ -112,7 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     resetBtn.addEventListener('click', () => {
-        current = human;
+        startPlayer = startPlayer === human ? ai : human;
+        current = startPlayer;
         gameOver = false;
         createBoard();
     });
