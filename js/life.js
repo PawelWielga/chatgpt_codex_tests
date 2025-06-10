@@ -40,7 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 display.appendChild(span);
             }
         });
-        const total = stats.attack + stats.defense + stats.speed;
+        const total = ['attack','defense','speed']
+            .map(k => Number(stats[k]) || 0)
+            .reduce((a,b) => a + b, 0);
         remainingSpan.textContent = totalPoints - total;
     }
 
