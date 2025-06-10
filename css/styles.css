@@ -12,3 +12,14 @@ body {
     height: 100px;
     font-size: 2rem;
 }
+#memo-board {
+    display: grid;
+    grid-template-columns: repeat(4, 80px);
+    grid-template-rows: repeat(4, 80px);
+    gap: 5px;
+}
+#memo-board button {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+}
