@@ -1,12 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('memo-board');
     const resetBtn = document.getElementById('memo-reset');
-    const symbols = ['🍎','🍌','🍇','🍒','🍋','🍓','🍊','🍉'];
+    const status = document.getElementById('memo-status');
+    const sets = [
+        ['🍎','🍌','🍇','🍒','🍋','🍓','🍊','🍉'],
+        ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼'],
+        ['😀','😂','😎','😍','😡','🤢','🤠','🤖']
+    ];
+    let symbols = sets[0];
     let firstCard = null;
     let lock = false;
+    let moves = 0;
 
     function init() {
         board.innerHTML = '';
+        symbols = sets[Math.floor(Math.random() * sets.length)];
+        moves = 0;
+        status.textContent = 'Ruchy: 0';
         const deck = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
         deck.forEach(sym => {
             const btn = document.createElement('button');
@@ -31,6 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         lock = true;
+        moves++;
+        status.textContent = `Ruchy: ${moves}`;
         if (btn.dataset.sym === firstCard.dataset.sym) {
             btn.dataset.matched = 'true';
             firstCard.dataset.matched = 'true';
@@ -42,7 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 firstCard = null;
                 lock = false;
                 if ([...board.querySelectorAll('.memo-card')].every(b => b.dataset.matched === 'true')) {
-                    setTimeout(() => alert('Wygrana!'), 300);
+                    setTimeout(() => {
+                        status.textContent = `Wygrana w ${moves} ruchach!`;
+                    }, 300);
                 }
             }, 600);
         } else {
