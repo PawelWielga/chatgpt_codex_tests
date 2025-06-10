@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('board');
     const resetBtn = document.getElementById('reset');
-    let current = 'X';
+    const human = 'X';
+    const ai = 'O';
+    let current = human;
     let gameOver = false;
     const cells = [];
 
@@ -18,10 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleMove(index) {
-        if (gameOver || cells[index].textContent) return;
-        cells[index].textContent = current;
+        if (gameOver || cells[index].textContent || current !== human) return;
+        cells[index].textContent = human;
         if (checkWin()) {
-            alert(`Wygrał ${current}!`);
+            alert(`Wygrał ${human}!`);
             gameOver = true;
             return;
         }
@@ -30,7 +32,27 @@ document.addEventListener('DOMContentLoaded', () => {
             gameOver = true;
             return;
         }
-        current = current === 'X' ? 'O' : 'X';
+        current = ai;
+        setTimeout(computerMove, 300);
+    }
+
+    function computerMove() {
+        if (gameOver) return;
+        const empty = cells.filter(c => !c.textContent);
+        if (empty.length === 0) return;
+        const cell = empty[Math.floor(Math.random() * empty.length)];
+        cell.textContent = ai;
+        if (checkWin()) {
+            alert(`Wygrał ${ai}!`);
+            gameOver = true;
+            return;
+        }
+        if (cells.every(c => c.textContent)) {
+            alert('Remis!');
+            gameOver = true;
+            return;
+        }
+        current = human;
     }
 
     function checkWin() {
@@ -47,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     resetBtn.addEventListener('click', () => {
-        current = 'X';
+        current = human;
         gameOver = false;
         createBoard();
     });
