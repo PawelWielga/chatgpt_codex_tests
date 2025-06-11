@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cell = { mine: false, revealed: false, flagged: false, adj: 0, el: null };
                 const btn = document.createElement('button');
                 btn.className = 'mine-cell';
-                btn.addEventListener('click', () => reveal(r, c));
+                btn.innerHTML = '<div class="mine-cell-inner"><div class="mine-cell-front"></div><div class="mine-cell-back"></div></div>';
+                btn.addEventListener('click', () => revealWave(r, c));
                 btn.addEventListener('contextmenu', e => { e.preventDefault(); toggleFlag(r,c); });
                 boardEl.appendChild(btn);
                 cell.el = btn;
@@ -57,37 +58,68 @@ document.addEventListener('DOMContentLoaded', () => {
         return n;
     }
 
-    function reveal(r, c) {
+    function revealCell(r, c) {
         const cell = board[r][c];
         if (cell.revealed || cell.flagged) return;
         cell.revealed = true;
-        cell.el.disabled = true;
+        const front = cell.el.querySelector('.mine-cell-front');
+        const back = cell.el.querySelector('.mine-cell-back');
         if (cell.mine) {
-            cell.el.textContent = '💣';
+            front.textContent = '💣';
             cell.el.classList.add('mine');
+            flipCell(cell);
             gameOver(false);
             return;
         }
         if (cell.adj > 0) {
-            cell.el.textContent = cell.adj;
-        } else {
-            for (let dr = -1; dr <= 1; dr++) {
-                for (let dc = -1; dc <= 1; dc++) {
-                    if (dr || dc) {
-                        const nr = r + dr, nc = c + dc;
-                        if (nr >= 0 && nr < size && nc >= 0 && nc < size) reveal(nr, nc);
+            front.textContent = cell.adj;
+        }
+        flipCell(cell);
+    }
+
+    function flipCell(cell) {
+        const el = cell.el;
+        el.classList.add('flipped');
+        setTimeout(() => {
+            el.classList.add('revealed');
+        }, 400);
+    }
+
+    function revealWave(sr, sc) {
+        const queue = [{r: sr, c: sc, d: 0}];
+        const seen = new Set();
+        while (queue.length) {
+            const {r, c, d} = queue.shift();
+            if (r < 0 || c < 0 || r >= size || c >= size) continue;
+            const key = r + ',' + c;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            const cell = board[r][c];
+            if (cell.flagged || cell.revealed) continue;
+            setTimeout(() => {
+                revealCell(r, c);
+                if (!cell.mine) checkWin();
+            }, d * 60);
+            if (!cell.mine && cell.adj === 0) {
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr || dc) queue.push({r: r + dr, c: c + dc, d: d + 1});
                     }
                 }
             }
+            if (cell.mine) {
+                // Stop expanding when a mine is hit
+                break;
+            }
         }
-        checkWin();
     }
 
     function toggleFlag(r, c) {
         const cell = board[r][c];
         if (cell.revealed) return;
         cell.flagged = !cell.flagged;
-        cell.el.textContent = cell.flagged ? '🚩' : '';
+        const back = cell.el.querySelector('.mine-cell-back');
+        back.textContent = cell.flagged ? '🚩' : '';
         checkWin();
     }
 
@@ -95,10 +127,17 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let r = 0; r < size; r++) {
             for (let c = 0; c < size; c++) {
                 const cell = board[r][c];
+                if (cell.revealed) continue;
+                const front = cell.el.querySelector('.mine-cell-front');
+                const back = cell.el.querySelector('.mine-cell-back');
+                back.textContent = '';
                 if (cell.mine) {
-                    cell.el.textContent = '💣';
+                    front.textContent = '💣';
+                    cell.el.classList.add('mine');
+                } else if (cell.adj > 0) {
+                    front.textContent = cell.adj;
                 }
-                cell.el.disabled = true;
+                flipCell(cell);
             }
         }
     }
