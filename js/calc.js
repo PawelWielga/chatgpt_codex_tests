@@ -10,9 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
         'C'
     ];
 
+    const svgPath = 'M10 55 Q10 35 30 30 L40 10 L50 30 L60 10 L70 30 Q90 35 90 55 Q90 80 50 90 Q10 80 10 55 Z';
+
     buttons.forEach(val => {
         const btn = document.createElement('button');
-        btn.textContent = val;
+        btn.innerHTML =
+            `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="${svgPath}"/></svg>`+
+            `<span>${val}</span>`;
         btn.dataset.value = val;
         btn.classList.add('cat-button');
         if ('/*-+=C'.includes(val)) {
@@ -22,8 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     grid.addEventListener('click', e => {
-        if (e.target.tagName !== 'BUTTON') return;
-        const value = e.target.dataset.value;
+        const target = e.target.closest('button');
+        if (!target) return;
+        const value = target.dataset.value;
         if (value === 'C') {
             display.value = '';
         } else if (value === '=') {
