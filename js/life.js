@@ -25,6 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const speciesEmojis = ['😺','🐶','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯'];
     const foodEmojis = ['🍎','🍌','🍇','🍒','🍓','🍑','🍍','🥝'];
 
+    const diets = ["herbivore","carnivore","omnivore"];
+    const appearanceSelect = document.getElementById("appearance-select");
+    speciesEmojis.forEach(e => {
+        const opt = document.createElement("option");
+        opt.value = e;
+        opt.textContent = e;
+        appearanceSelect.appendChild(opt);
+    });
     function updateDisplays() {
         Object.keys(statDisplays).forEach(key => {
             const display = statDisplays[key];
@@ -141,9 +149,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return null;
     }
+    function predatorNearby(m) {
+        for (const o of microbes) {
+            if (o === m) continue;
+            const d = Math.abs(o.x - m.x) + Math.abs(o.y - m.y);
+            if (d <= 3) {
+                if ((o.diet === "carnivore" && m.diet !== "carnivore") ||
+                    (o.diet === "omnivore" && m.diet === "herbivore")) {
+                    return o;
+                }
+            }
+        }
+        return null;
+    }
+
+    function nearestPrey(m) {
+        let best = null;
+        let dist = Infinity;
+        microbes.forEach(o => {
+            if (o === m) return;
+            if ((m.diet === "carnivore" && o.diet !== "carnivore") ||
+                (m.diet === "omnivore" && o.diet === "herbivore")) {
+                const d = Math.abs(o.x - m.x) + Math.abs(o.y - m.y);
+                if (d < dist) { dist = d; best = o; }
+            }
+        });
+        return best;
+    }
 
     function moveMicrobe(m) {
         for (let s=0; s<m.speed; s++) {
+            const predator = predatorNearby(m);
+            if (predator) {
+                if (predator.x > m.x && m.x > 0) m.x--;
+                else if (predator.x < m.x && m.x < size-1) m.x++;
+                if (predator.y > m.y && m.y > 0) m.y--;
+                else if (predator.y < m.y && m.y < size-1) m.y++;
+                continue;
+            }
             const danger = strongerNearby(m);
             if (danger) {
                 if (danger.x > m.x && m.x > 0) m.x--;
@@ -152,22 +195,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (danger.y < m.y && m.y < size-1) m.y++;
                 continue;
             }
-            const food = nearestFood(m);
-            if (food) {
-                if (food.x > m.x && m.x < size-1) m.x++;
-                else if (food.x < m.x && m.x > 0) m.x--;
-                if (food.y > m.y && m.y < size-1) m.y++;
-                else if (food.y < m.y && m.y > 0) m.y--;
+            let target = null;
+            if (m.diet !== "carnivore") {
+                target = nearestFood(m);
+            }
+            if (!target && m.diet !== "herbivore") {
+                const prey = nearestPrey(m);
+                if (prey) {
+                    if (prey.x > m.x && m.x < size-1) m.x++;
+                    else if (prey.x < m.x && m.x > 0) m.x--;
+                    if (prey.y > m.y && m.y < size-1) m.y++;
+                    else if (prey.y < m.y && m.y > 0) m.y--;
+                    continue;
+                }
+            }
+            if (target) {
+                if (target.x > m.x && m.x < size-1) m.x++;
+                else if (target.x < m.x && m.x > 0) m.x--;
+                if (target.y > m.y && m.y < size-1) m.y++;
+                else if (target.y < m.y && m.y > 0) m.y--;
             } else {
                 const dir = Math.floor(Math.random()*4);
-                if (dir===0 && m.y>0) m.y--;      // up
-                if (dir===1 && m.y<size-1) m.y++; // down
-                if (dir===2 && m.x>0) m.x--;      // left
-                if (dir===3 && m.x<size-1) m.x++; // right
+                if (dir===0 && m.y>0) m.y--;
+                if (dir===1 && m.y<size-1) m.y++;
+                if (dir===2 && m.x>0) m.x--;
+                if (dir===3 && m.x<size-1) m.x++;
             }
         }
     }
-
     function step() {
         if (Math.random() < 0.1 && foods.length < 10) spawnFood();
         microbes.forEach(moveMicrobe);
@@ -210,9 +265,16 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i=microbes.length-1; i>=0; i--) {
             for (let j=i-1; j>=0; j--) {
                 if (microbes[i].x===microbes[j].x && microbes[i].y===microbes[j].y) {
-                    const loser = fight(microbes[i], microbes[j]);
+                    const a = microbes[i];
+                    const b = microbes[j];
+                    const loser = fight(a, b);
+                    const winner = loser === a ? b : a;
                     board.removeChild(loser.el);
                     microbes.splice(microbes.indexOf(loser),1);
+                    if ((winner.diet === "carnivore") ||
+                        (winner.diet === "omnivore" && loser.diet === "herbivore")) {
+                        winner.hunger = Math.min(100, winner.hunger + 40);
+                    }
                     if (loser.isPlayer) return endGame(false);
                     break;
                 }
@@ -247,10 +309,11 @@ document.addEventListener('DOMContentLoaded', () => {
             y: Math.floor(Math.random()*size),
             attack: stats.attack,
             defense: stats.defense,
-            speed: stats.speed || 1,
+            speed: Math.max(1, Math.ceil((stats.speed || 1)/2)),
             isPlayer: true,
+            diet: diets[Math.floor(Math.random()*diets.length)],
             hunger: 100,
-            emoji: speciesEmojis[Math.floor(Math.random()*speciesEmojis.length)],
+            emoji: appearanceSelect.value,
             el: null,
             hasEaten: false
         };
@@ -264,8 +327,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 y: Math.floor(Math.random()*size),
                 attack: s.attack,
                 defense: s.defense,
-                speed: s.speed || 1,
+                speed: Math.max(1, Math.ceil((s.speed || 1)/2)),
                 isPlayer: false,
+                diet: diets[Math.floor(Math.random()*diets.length)],
                 hunger: 100,
                 emoji: speciesEmojis[Math.floor(Math.random()*speciesEmojis.length)],
                 el: null,
@@ -276,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         for(let i=0;i<3;i++) spawnFood();
         drawEntities();
-        timer = setInterval(step, 300);
+        timer = setInterval(step, 500);
     }
 
     startBtn.addEventListener('click', startGame);
