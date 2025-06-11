@@ -3,13 +3,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const status = document.getElementById('rps-status');
     const scoreSpan = document.getElementById('rps-score');
     const compSpan = document.getElementById('rps-comp');
+    const slot = document.getElementById('rps-slot');
     const resetBtn = document.getElementById('rps-reset');
     let score = 0;
     let comp = 0;
     const choices = ['rock', 'paper', 'scissors'];
+    const icons = {
+        rock: '👊',
+        paper: '✋',
+        scissors: '✌️'
+    };
 
-    function play(choice) {
-        const computer = choices[Math.floor(Math.random() * 3)];
+    function determineWinner(choice, computer) {
         if (choice === computer) {
             status.textContent = `Remis! Obaj wybraliście ${display(choice)}`;
         } else if (
@@ -27,6 +32,33 @@ document.addEventListener('DOMContentLoaded', () => {
         compSpan.textContent = comp;
     }
 
+    function play(choice) {
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            if (btn.dataset.choice !== choice) {
+                btn.classList.add('rps-hidden');
+            }
+        });
+
+        status.textContent = '';
+        let i = 0;
+        const anim = setInterval(() => {
+            slot.textContent = icons[choices[i % 3]];
+            i++;
+        }, 100);
+
+        setTimeout(() => {
+            clearInterval(anim);
+            const computer = choices[Math.floor(Math.random() * 3)];
+            slot.textContent = icons[computer];
+            determineWinner(choice, computer);
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('rps-hidden');
+            });
+        }, 1000);
+    }
+
     function display(choice) {
         return choice === 'rock' ? 'kamień' : choice === 'paper' ? 'papier' : 'nożyce';
     }
@@ -41,5 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
         scoreSpan.textContent = '0';
         compSpan.textContent = '0';
         status.textContent = '';
+        slot.textContent = '';
     });
 });
