@@ -2,6 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('snake-board');
     const startBtn = document.getElementById('snake-start');
     const scoreSpan = document.getElementById('snake-score');
+    const btnUp = document.getElementById('snake-up');
+    const btnDown = document.getElementById('snake-down');
+    const btnLeft = document.getElementById('snake-left');
+    const btnRight = document.getElementById('snake-right');
     const size = 20;
     let cells = [];
     let snake = [];
@@ -89,6 +93,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'ArrowDown' && direction.y !== -1) direction = {x: 0, y: 1};
         if (e.key === 'ArrowLeft' && direction.x !== 1) direction = {x: -1, y: 0};
         if (e.key === 'ArrowRight' && direction.x !== -1) direction = {x: 1, y: 0};
+    });
+
+    if (btnUp) btnUp.addEventListener('click', () => {
+        if (direction.y !== 1) direction = {x: 0, y: -1};
+    });
+    if (btnDown) btnDown.addEventListener('click', () => {
+        if (direction.y !== -1) direction = {x: 0, y: 1};
+    });
+    if (btnLeft) btnLeft.addEventListener('click', () => {
+        if (direction.x !== 1) direction = {x: -1, y: 0};
+    });
+    if (btnRight) btnRight.addEventListener('click', () => {
+        if (direction.x !== -1) direction = {x: 1, y: 0};
     });
 
     startBtn.addEventListener('click', startGame);
