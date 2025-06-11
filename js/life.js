@@ -1,4 +1,4 @@
-// New life game with hunger and food
+// Advanced organism simulation
 
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('life-board');
@@ -17,6 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const size = 20;
     const cellSize = 20;
+    const maxFood = 20;
+    const baseLifespan = 150;
+    const reproductionEnergy = 80;
+    const energyGainFromFood = 40;
+    const moveCost = 0.5;
 
     let microbes = [];
     let foods = [];
@@ -235,19 +240,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (dir===2 && m.x>0) m.x--;
                 if (dir===3 && m.x<size-1) m.x++;
             }
+            m.hunger -= moveCost;
         }
     }
     function step() {
         ticks++;
         timeSpan.textContent = (ticks/2).toFixed(1);
-        if (Math.random() < 0.1 && foods.length < 10) spawnFood();
+        if (Math.random() < 0.1 && foods.length < maxFood) spawnFood();
         microbes.forEach(moveMicrobe);
 
-        // decrease hunger and remove dead
+        // decrease hunger, age and remove dead
         for (let i=microbes.length-1; i>=0; i--) {
             const m = microbes[i];
             m.hunger -= 1;
-            if (m.hunger <= 0) {
+            m.age += 1;
+            if (m.hunger <= 0 || m.age > m.lifespan) {
                 board.removeChild(m.el);
                 microbes.splice(i,1);
                 if (m.isPlayer) return endGame(false);
@@ -261,18 +268,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (f.x === m.x && f.y === m.y) {
                     board.removeChild(f.el);
                     foods.splice(i,1);
-                    m.hunger = Math.min(100, m.hunger + 40);
-                    if (m.hunger > 80 && m.hasEaten) {
+                    m.hunger = Math.min(100, m.hunger + energyGainFromFood);
+                    if (m.hunger > reproductionEnergy && Math.random() < 0.2) {
                         const child = {...m};
                         child.x = Math.max(0, Math.min(size-1, m.x+1));
                         child.y = Math.max(0, Math.min(size-1, m.y+1));
-                        child.hunger = 60;
+                        child.hunger = m.hunger / 2;
+                        m.hunger = m.hunger / 2;
+                        child.age = 0;
+                        child.lifespan = m.lifespan + (Math.random()*20-10);
                         child.isPlayer = false;
                         child.el = createEntity(m.emoji);
                         microbes.push(child);
                         drawEntities();
                     }
-                    m.hasEaten = true;
                 }
             }
         });
@@ -289,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     microbes.splice(microbes.indexOf(loser),1);
                     if ((winner.diet === "carnivore") ||
                         (winner.diet === "omnivore" && loser.diet === "herbivore")) {
-                        winner.hunger = Math.min(100, winner.hunger + 40);
+                        winner.hunger = Math.min(100, winner.hunger + energyGainFromFood);
                     }
                     if (loser.isPlayer) return endGame(false);
                     break;
@@ -338,7 +347,8 @@ document.addEventListener('DOMContentLoaded', () => {
             hunger: 100,
             emoji: appearanceSelect.value,
             el: null,
-            hasEaten: false
+            age: 0,
+            lifespan: baseLifespan + Math.random()*50
         };
         player.el = createEntity(player.emoji);
         microbes.push(player);
@@ -356,7 +366,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 hunger: 100,
                 emoji: speciesEmojis[Math.floor(Math.random()*speciesEmojis.length)],
                 el: null,
-                hasEaten: false
+                age: 0,
+                lifespan: baseLifespan + Math.random()*50
             };
             m.el = createEntity(m.emoji);
             microbes.push(m);
