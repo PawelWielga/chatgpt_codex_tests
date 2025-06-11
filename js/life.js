@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('life-board');
     const startBtn = document.getElementById('life-start');
     const hungerBar = document.getElementById('hunger-bar');
+    const timeSpan = document.getElementById('time-span');
     const statDisplays = {
         attack: document.getElementById('stat-attack'),
         defense: document.getElementById('stat-defense'),
@@ -21,17 +22,30 @@ document.addEventListener('DOMContentLoaded', () => {
     let foods = [];
     let timer = null;
     let player = null;
+    let ticks = 0;
 
     const speciesEmojis = ['😺','🐶','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯'];
     const foodEmojis = ['🍎','🍌','🍇','🍒','🍓','🍑','🍍','🥝'];
 
     const diets = ["herbivore","carnivore","omnivore"];
     const appearanceSelect = document.getElementById("appearance-select");
+    const dietSelect = document.getElementById("diet-select");
     speciesEmojis.forEach(e => {
         const opt = document.createElement("option");
         opt.value = e;
         opt.textContent = e;
         appearanceSelect.appendChild(opt);
+    });
+    const dietLabels = {
+        herbivore: 'Roślinożerca',
+        carnivore: 'Mięsożerca',
+        omnivore: 'Wszystkożerca'
+    };
+    diets.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = dietLabels[d];
+        dietSelect.appendChild(opt);
     });
     function updateDisplays() {
         Object.keys(statDisplays).forEach(key => {
@@ -224,6 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     function step() {
+        ticks++;
+        timeSpan.textContent = (ticks/2).toFixed(1);
         if (Math.random() < 0.1 && foods.length < 10) spawnFood();
         microbes.forEach(moveMicrobe);
 
@@ -289,7 +305,12 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(timer);
         timer = null;
         setTimeout(() => {
-            alert(win ? 'Przetrwałeś!' : 'Twój organizm zginął.');
+            const time = (ticks/2).toFixed(1);
+            if (win) {
+                alert('Przetrwałeś! Czas: ' + time + ' s.');
+            } else {
+                alert('Twój organizm zginął po ' + time + ' s.');
+            }
         }, 10);
     }
 
@@ -303,6 +324,8 @@ document.addEventListener('DOMContentLoaded', () => {
         board.innerHTML = '';
         microbes = [];
         foods = [];
+        ticks = 0;
+        timeSpan.textContent = '0';
 
         player = {
             x: Math.floor(Math.random()*size),
@@ -311,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
             defense: stats.defense,
             speed: Math.max(1, Math.ceil((stats.speed || 1)/2)),
             isPlayer: true,
-            diet: diets[Math.floor(Math.random()*diets.length)],
+            diet: dietSelect.value,
             hunger: 100,
             emoji: appearanceSelect.value,
             el: null,
