@@ -1,0 +1,28 @@
+#connect4-board {
+    display: grid;
+    grid-template-columns: repeat(7, 60px);
+    grid-template-rows: repeat(6, 60px);
+    gap: 5px;
+    margin: 0 auto;
+    width: max-content;
+}
+
+#connect4-board .cell {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #6c757d;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#connect4-board .red {
+    background-color: #dc3545;
+}
+
+#connect4-board .yellow {
+    background-color: #ffc107;
+}
