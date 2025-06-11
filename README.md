@@ -10,5 +10,5 @@ https://pawelwielga.github.io/chatgpt_codex_tests/index.html
 * **Wąż** – traditional Snake. Collect food to grow longer without hitting walls or yourself.
 * **Kamień, Papier, Nożyce** – simple duel against the computer. Choose your symbol and see who wins.
 * **Saper** – classic Minesweeper. Uncover all safe fields without detonating a mine.
-* **Kalkulator** – basic calculator with pink and purple theme. The digit buttons are styled as cute cat heads.
+* **Catculator** – basic calculator with pink and purple theme. The digit buttons are styled as cute cat heads.
 * **Tetris** – classic falling-block puzzle with on‑screen arrow controls.
