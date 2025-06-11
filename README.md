@@ -9,3 +9,4 @@ https://pawelwielga.github.io/chatgpt_codex_tests/index.html
 * **Gra w życie** – simulation of simple organisms. Configure a creature with attack, defense and speed stats and try to survive by eating, hunting and reproducing in a tiny ecosystem.
 * **Wąż** – traditional Snake. Collect food to grow longer without hitting walls or yourself.
 * **Kamień, Papier, Nożyce** – simple duel against the computer. Choose your symbol and see who wins.
+* **Saper** – classic Minesweeper. Uncover all safe fields without detonating a mine.

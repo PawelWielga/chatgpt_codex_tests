@@ -1,0 +1,21 @@
+#mine-board {
+    display: grid;
+    grid-template-columns: repeat(8, 30px);
+    grid-template-rows: repeat(8, 30px);
+    gap: 2px;
+    margin: 0 auto;
+    width: max-content;
+}
+
+#mine-board button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid #6c757d;
+    background-color: #e9ecef;
+}
+
+#mine-board button.mine {
+    background-color: #dc3545;
+    color: #fff;
+}
