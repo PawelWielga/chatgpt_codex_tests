@@ -24,3 +24,9 @@ body {
 body > footer {
     margin-top: auto;
 }
+
+/* Layout for badge legend */
+.badge-legend span {
+    display: inline-flex;
+    align-items: center;
+}
