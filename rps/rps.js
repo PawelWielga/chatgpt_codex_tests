@@ -5,6 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const compSpan = document.getElementById('rps-comp');
     const slot = document.getElementById('rps-slot');
     const resetBtn = document.getElementById('rps-reset');
+    const playerLabel = document.getElementById('rps-player');
+    loadPlayerSettings();
+    if (playerLabel) {
+        playerLabel.textContent = `${playerSettings.name} ${playerSettings.emoji}`;
+    }
     let score = 0;
     let comp = 0;
     const choices = ['rock', 'paper', 'scissors'];
