@@ -6,10 +6,9 @@ This repository was created to test the ChatGPT Codex tool and contains a small 
 
 The site consists of several lightweight browser games written in plain HTML, CSS and vanilla JavaScript. Each game lives in its own folder inside the `games/` directory and includes a dedicated `*.html`, `*.js` and `*.css` file. All pages share styles from `css/common.css` and a simple footer injected by `js/footer.js`. Player preferences such as name, colour and emoji are stored in `localStorage` via `js/player-settings.js` and can be changed on the `settings.html` page.
 
-Two helper modules provide optional online play:
+A helper module provides optional online play:
 
 * `js/codeconnect.js` – uses [PeerJS](https://peerjs.com/) to establish a data channel between players identified by short 5‑character codes.
-* `js/qrconnect.js` – alternative WebRTC setup using the [QrScanner](https://github.com/nimiq/qr-scanner) and [QRCode](https://github.com/soldair/node-qrcode) libraries to exchange signalling information via generated QR codes.
 
 Bootstrap and Bootstrap Icons (loaded from a CDN) supply the basic layout and icons across all pages. The only additional framework is [three.js](https://threejs.org/) which powers the rotating 3D cube demo.
 
