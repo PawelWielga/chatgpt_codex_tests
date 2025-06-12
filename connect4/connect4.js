@@ -7,8 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const hostBtn = document.getElementById('host-btn');
     const joinBtn = document.getElementById('join-btn');
     const qrContainer = document.getElementById('qr-container');
-    const qrCanvas = document.getElementById('qr-canvas');
-    const qrVideo = document.getElementById('qr-video');
     const qrText = document.getElementById('qr-text');
     const rows = 6;
     const cols = 7;
@@ -24,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let mode = 'local';
     let isHost = false;
     let isMyTurn = false;
-    let pc = null;
     let dc = null;
     let board = [];
     let current = 'red';
@@ -54,9 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
         isHost = true;
         isMyTurn = true;
         mode = 'remote';
-        const elems = {container: qrContainer, canvas: qrCanvas, video: qrVideo, text: qrText};
-        const conn = await QrConnect.host(elems, 'c4');
-        pc = conn.pc;
+        qrContainer.style.display = 'block';
+        const elems = { text: qrText };
+        const conn = await CodeConnect.host(elems);
+        qrContainer.style.display = 'none';
+        if (!conn) return;
         dc = conn.dc;
         setupDataChannel();
         createBoard();
@@ -67,9 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
         isHost = false;
         isMyTurn = false;
         mode = 'remote';
-        const elems = {container: qrContainer, canvas: qrCanvas, video: qrVideo, text: qrText};
-        const conn = await QrConnect.join(elems, 'c4');
-        pc = conn.pc;
+        qrContainer.style.display = 'block';
+        const elems = { text: qrText };
+        const conn = await CodeConnect.join(elems);
+        qrContainer.style.display = 'none';
+        if (!conn) return;
         dc = conn.dc;
         setupDataChannel();
         createBoard();

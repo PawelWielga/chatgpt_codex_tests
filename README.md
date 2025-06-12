@@ -12,5 +12,5 @@ https://pawelwielga.github.io/chatgpt_codex_tests/index.html
 * **Saper** – classic Minesweeper. Uncover all safe fields without detonating a mine.
 * **Catculator** – basic calculator with pink and purple theme. The digit buttons are styled as cute cat heads.
 * **Tetris** – classic falling-block puzzle with on‑screen arrow controls.
-* **Connect 4** – two players drop red and yellow discs to line up four in a row.
+* **Connect 4** – two players drop red and yellow discs to line up four in a row. Online play now works through PeerJS using short 5-character codes – no local server needed.
 * **Pong** – classic paddle and ball game for two players.
