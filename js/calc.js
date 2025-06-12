@@ -33,7 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
             display.value = '';
         } else if (value === '=') {
             try {
-                display.value = eval(display.value);
+                const result = eval(display.value);
+                if (typeof result === 'number') {
+                    display.value = parseFloat(result.toFixed(10));
+                } else {
+                    display.value = result;
+                }
             } catch {
                 display.value = 'Error';
             }
