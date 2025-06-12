@@ -23,11 +23,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const energyGainFromFood = 40;
     const moveCost = 0.5;
 
+    const terrains = ['water','desert','meadow','forest','mountain'];
+    const terrainMoveCost = {
+        water: Infinity,
+        desert: moveCost * 2,
+        meadow: moveCost,
+        forest: moveCost * 1.5,
+        mountain: moveCost * 2
+    };
+
+    let terrainGrid = [];
+    let terrainLayer = null;
+    let entityLayer = null;
+
     let microbes = [];
     let foods = [];
     let timer = null;
     let player = null;
     let ticks = 0;
+
+    createLayers();
+    generateTerrain();
+    renderTerrain();
 
     const speciesEmojis = ['😺','🐶','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯'];
     const foodEmojis = ['🍎','🍌','🍇','🍒','🍓','🍑','🍍','🥝'];
@@ -102,11 +119,61 @@ document.addEventListener('DOMContentLoaded', () => {
         return st;
     }
 
+    function createLayers() {
+        terrainLayer = document.createElement('div');
+        terrainLayer.id = 'terrain-layer';
+        terrainLayer.style.gridTemplateColumns = `repeat(${size}, ${cellSize}px)`;
+        terrainLayer.style.gridTemplateRows = `repeat(${size}, ${cellSize}px)`;
+        board.appendChild(terrainLayer);
+
+        entityLayer = document.createElement('div');
+        entityLayer.id = 'entity-layer';
+        board.appendChild(entityLayer);
+    }
+
+    function generateTerrain() {
+        terrainGrid = [];
+        for (let y=0; y<size; y++) {
+            const row = [];
+            for (let x=0; x<size; x++) {
+                const r = Math.random();
+                let t;
+                if (r < 0.1) t = 'water';
+                else if (r < 0.25) t = 'desert';
+                else if (r < 0.6) t = 'meadow';
+                else if (r < 0.85) t = 'forest';
+                else t = 'mountain';
+                row.push(t);
+            }
+            terrainGrid.push(row);
+        }
+    }
+
+    function renderTerrain() {
+        terrainLayer.innerHTML = '';
+        for (let y=0; y<size; y++) {
+            for (let x=0; x<size; x++) {
+                const cell = document.createElement('div');
+                cell.className = `terrain-cell ${terrainGrid[y][x]}`;
+                terrainLayer.appendChild(cell);
+            }
+        }
+    }
+
+    function randomCell() {
+        let x, y;
+        do {
+            x = Math.floor(Math.random()*size);
+            y = Math.floor(Math.random()*size);
+        } while (terrainGrid[y][x] === 'water');
+        return {x, y};
+    }
+
     function createEntity(emoji) {
         const el = document.createElement('div');
         el.className = 'entity';
         el.textContent = emoji;
-        board.appendChild(el);
+        entityLayer.appendChild(el);
         return el;
     }
 
@@ -114,7 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const positions = [];
         for (let y=0; y<size; y++) {
             for (let x=0; x<size; x++) {
-                if (!microbes.some(m => m.x===x && m.y===y) &&
+                if (terrainGrid[y][x] !== 'water' &&
+                    !microbes.some(m => m.x===x && m.y===y) &&
                     !foods.some(f => f.x===x && f.y===y)) {
                     positions.push({x,y});
                 }
@@ -196,22 +264,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return best;
     }
 
+    function moveRelative(m, dx, dy) {
+        const nx = m.x + dx;
+        const ny = m.y + dy;
+        if (nx < 0 || nx >= size || ny < 0 || ny >= size) return;
+        if (terrainGrid[ny][nx] === 'water') return;
+        m.x = nx;
+        m.y = ny;
+        m.hunger -= terrainMoveCost[terrainGrid[ny][nx]] || moveCost;
+    }
+
     function moveMicrobe(m) {
         for (let s=0; s<m.speed; s++) {
             const predator = predatorNearby(m);
             if (predator) {
-                if (predator.x > m.x && m.x > 0) m.x--;
-                else if (predator.x < m.x && m.x < size-1) m.x++;
-                if (predator.y > m.y && m.y > 0) m.y--;
-                else if (predator.y < m.y && m.y < size-1) m.y++;
+                if (predator.x > m.x) moveRelative(m, -1, 0);
+                else if (predator.x < m.x) moveRelative(m, 1, 0);
+                if (predator.y > m.y) moveRelative(m, 0, -1);
+                else if (predator.y < m.y) moveRelative(m, 0, 1);
                 continue;
             }
             const danger = strongerNearby(m);
             if (danger) {
-                if (danger.x > m.x && m.x > 0) m.x--;
-                else if (danger.x < m.x && m.x < size-1) m.x++;
-                if (danger.y > m.y && m.y > 0) m.y--;
-                else if (danger.y < m.y && m.y < size-1) m.y++;
+                if (danger.x > m.x) moveRelative(m, -1, 0);
+                else if (danger.x < m.x) moveRelative(m, 1, 0);
+                if (danger.y > m.y) moveRelative(m, 0, -1);
+                else if (danger.y < m.y) moveRelative(m, 0, 1);
                 continue;
             }
             let target = null;
@@ -221,26 +299,25 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!target && m.diet !== "herbivore") {
                 const prey = nearestPrey(m);
                 if (prey) {
-                    if (prey.x > m.x && m.x < size-1) m.x++;
-                    else if (prey.x < m.x && m.x > 0) m.x--;
-                    if (prey.y > m.y && m.y < size-1) m.y++;
-                    else if (prey.y < m.y && m.y > 0) m.y--;
+                    if (prey.x > m.x) moveRelative(m, 1, 0);
+                    else if (prey.x < m.x) moveRelative(m, -1, 0);
+                    if (prey.y > m.y) moveRelative(m, 0, 1);
+                    else if (prey.y < m.y) moveRelative(m, 0, -1);
                     continue;
                 }
             }
             if (target) {
-                if (target.x > m.x && m.x < size-1) m.x++;
-                else if (target.x < m.x && m.x > 0) m.x--;
-                if (target.y > m.y && m.y < size-1) m.y++;
-                else if (target.y < m.y && m.y > 0) m.y--;
+                if (target.x > m.x) moveRelative(m, 1, 0);
+                else if (target.x < m.x) moveRelative(m, -1, 0);
+                if (target.y > m.y) moveRelative(m, 0, 1);
+                else if (target.y < m.y) moveRelative(m, 0, -1);
             } else {
                 const dir = Math.floor(Math.random()*4);
-                if (dir===0 && m.y>0) m.y--;
-                if (dir===1 && m.y<size-1) m.y++;
-                if (dir===2 && m.x>0) m.x--;
-                if (dir===3 && m.x<size-1) m.x++;
+                if (dir===0) moveRelative(m, 0, -1);
+                if (dir===1) moveRelative(m, 0, 1);
+                if (dir===2) moveRelative(m, -1, 0);
+                if (dir===3) moveRelative(m, 1, 0);
             }
-            m.hunger -= moveCost;
         }
     }
     function step() {
@@ -255,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
             m.hunger -= 1;
             m.age += 1;
             if (m.hunger <= 0 || m.age > m.lifespan) {
-                board.removeChild(m.el);
+                entityLayer.removeChild(m.el);
                 microbes.splice(i,1);
                 if (m.isPlayer) return endGame(false);
             }
@@ -266,13 +343,25 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i=foods.length-1; i>=0; i--) {
                 const f = foods[i];
                 if (f.x === m.x && f.y === m.y) {
-                    board.removeChild(f.el);
+                    entityLayer.removeChild(f.el);
                     foods.splice(i,1);
                     m.hunger = Math.min(100, m.hunger + energyGainFromFood);
                     if (m.hunger > reproductionEnergy && Math.random() < 0.2) {
                         const child = {...m};
-                        child.x = Math.max(0, Math.min(size-1, m.x+1));
-                        child.y = Math.max(0, Math.min(size-1, m.y+1));
+                        let cx, cy;
+                        for (let t=0; t<10; t++) {
+                            const nx = Math.max(0, Math.min(size-1, m.x + (Math.floor(Math.random()*3)-1)));
+                            const ny = Math.max(0, Math.min(size-1, m.y + (Math.floor(Math.random()*3)-1)));
+                            if (terrainGrid[ny][nx] !== 'water' && !microbes.some(o=>o.x===nx && o.y===ny)) {
+                                cx = nx; cy = ny; break;
+                            }
+                        }
+                        if (cx === undefined) {
+                            const pos = randomCell();
+                            cx = pos.x; cy = pos.y;
+                        }
+                        child.x = cx;
+                        child.y = cy;
                         child.hunger = m.hunger / 2;
                         m.hunger = m.hunger / 2;
                         child.age = 0;
@@ -294,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const b = microbes[j];
                     const loser = fight(a, b);
                     const winner = loser === a ? b : a;
-                    board.removeChild(loser.el);
+                    entityLayer.removeChild(loser.el);
                     microbes.splice(microbes.indexOf(loser),1);
                     if ((winner.diet === "carnivore") ||
                         (winner.diet === "omnivore" && loser.diet === "herbivore")) {
@@ -335,10 +424,14 @@ document.addEventListener('DOMContentLoaded', () => {
         foods = [];
         ticks = 0;
         timeSpan.textContent = '0';
+        createLayers();
+        generateTerrain();
+        renderTerrain();
 
+        const startPos = randomCell();
         player = {
-            x: Math.floor(Math.random()*size),
-            y: Math.floor(Math.random()*size),
+            x: startPos.x,
+            y: startPos.y,
             attack: stats.attack,
             defense: stats.defense,
             speed: Math.max(1, Math.ceil((stats.speed || 1)/2)),
@@ -355,9 +448,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let i=0; i<5; i++) {
             const s = randomStats();
+            const pos = randomCell();
             const m = {
-                x: Math.floor(Math.random()*size),
-                y: Math.floor(Math.random()*size),
+                x: pos.x,
+                y: pos.y,
                 attack: s.attack,
                 defense: s.defense,
                 speed: Math.max(1, Math.ceil((s.speed || 1)/2)),
