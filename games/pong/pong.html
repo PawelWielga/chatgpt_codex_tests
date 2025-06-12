@@ -10,10 +10,8 @@
     <link href="../../css/pong.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container py-5">
-        <div class="text-end">
-            <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#helpModal"><i class="bi bi-question-circle"></i></button>
-        </div>
+    <div class="container py-5 position-relative">
+        <button type="button" class="btn btn-link help-button" data-bs-toggle="modal" data-bs-target="#helpModal"><i class="bi bi-question-circle"></i></button>
         <h1 class="text-center mb-4">Pong</h1>
         <canvas id="pong-canvas" width="400" height="300" class="mb-3"></canvas>
         <p class="text-center">Wynik: <span id="pong-score">0 : 0</span></p>
