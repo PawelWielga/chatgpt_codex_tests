@@ -287,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createBoard();
     updateNamesDisplay();
     if (infoP) {
-        infoP.textContent = `Grasz jako ${playerSettings.name} ${playerSettings.emoji}`;
+        const badge = `<span class="badge" style="background-color: ${playerSettings.color}; color: #fff;">${playerSettings.name} ${playerSettings.emoji}</span>`;
+        infoP.innerHTML = `Grasz jako ${badge}`;
     }
 });
