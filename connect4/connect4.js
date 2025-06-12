@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const boardDiv = document.getElementById('connect4-board');
+    const wrapperDiv = document.getElementById('connect4-wrapper');
+    const overlaySvg = document.getElementById('connect4-overlay');
     const statusP = document.getElementById('connect4-status');
     const resetBtn = document.getElementById('connect4-reset');
     const rows = 6;
@@ -8,9 +10,74 @@ document.addEventListener('DOMContentLoaded', () => {
     let current = 'red';
     let gameOver = false;
     let animating = false;
+    let cellSize = 60;
+    let gapSize = 5;
 
     function display(player) {
         return player === 'red' ? 'Czerwony' : 'Żółty';
+    }
+
+    function resizeBoard() {
+        const ratio = 5 / 60;
+        const maxWidth = Math.min(window.innerWidth - 20, 450);
+        cellSize = Math.floor(maxWidth / (cols + (cols - 1) * ratio));
+        gapSize = Math.round(cellSize * ratio);
+        const boardWidth = cellSize * cols + gapSize * (cols - 1);
+        const boardHeight = cellSize * rows + gapSize * (rows - 1);
+        document.documentElement.style.setProperty('--cell-size', `${cellSize}px`);
+        document.documentElement.style.setProperty('--gap-size', `${gapSize}px`);
+        wrapperDiv.style.width = boardWidth + 'px';
+        wrapperDiv.style.height = boardHeight + 'px';
+        drawOverlay();
+    }
+
+    function drawOverlay() {
+        const ns = 'http://www.w3.org/2000/svg';
+        overlaySvg.setAttribute('width', wrapperDiv.clientWidth);
+        overlaySvg.setAttribute('height', wrapperDiv.clientHeight);
+        overlaySvg.innerHTML = '';
+
+        const defs = document.createElementNS(ns, 'defs');
+        const mask = document.createElementNS(ns, 'mask');
+        mask.setAttribute('id', 'holes');
+        const rectMask = document.createElementNS(ns, 'rect');
+        rectMask.setAttribute('width', '100%');
+        rectMask.setAttribute('height', '100%');
+        rectMask.setAttribute('fill', 'white');
+        mask.appendChild(rectMask);
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const circle = document.createElementNS(ns, 'circle');
+                circle.setAttribute('cx', c * (cellSize + gapSize) + cellSize / 2);
+                circle.setAttribute('cy', r * (cellSize + gapSize) + cellSize / 2);
+                circle.setAttribute('r', cellSize / 2);
+                circle.setAttribute('fill', 'black');
+                mask.appendChild(circle);
+            }
+        }
+        defs.appendChild(mask);
+        overlaySvg.appendChild(defs);
+
+        const boardRect = document.createElementNS(ns, 'rect');
+        boardRect.setAttribute('width', '100%');
+        boardRect.setAttribute('height', '100%');
+        boardRect.setAttribute('fill', '#0d6efd');
+        boardRect.setAttribute('mask', 'url(#holes)');
+        overlaySvg.appendChild(boardRect);
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const outline = document.createElementNS(ns, 'circle');
+                outline.setAttribute('cx', c * (cellSize + gapSize) + cellSize / 2);
+                outline.setAttribute('cy', r * (cellSize + gapSize) + cellSize / 2);
+                outline.setAttribute('r', cellSize / 2);
+                outline.setAttribute('fill', 'none');
+                outline.setAttribute('stroke', '#6c757d');
+                outline.setAttribute('stroke-width', '2');
+                overlaySvg.appendChild(outline);
+            }
+        }
     }
 
     function createBoard() {
@@ -42,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const disc = document.createElement('div');
                 disc.className = `cell drop-disc ${current}`;
                 disc.style.left = cell.offsetLeft + 'px';
-                disc.style.top = '-70px';
+                disc.style.top = -cellSize + 'px';
                 boardDiv.appendChild(disc);
 
                 requestAnimationFrame(() => {
@@ -96,5 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     resetBtn.addEventListener('click', createBoard);
+    window.addEventListener('resize', resizeBoard);
+    resizeBoard();
     createBoard();
 });

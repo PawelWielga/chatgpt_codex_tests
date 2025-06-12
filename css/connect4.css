@@ -1,36 +1,59 @@
+:root {
+    --cell-size: 60px;
+    --gap-size: 5px;
+    --board-color: #0d6efd;
+}
+
+#connect4-wrapper {
+    width: calc(var(--cell-size) * 7 + var(--gap-size) * 6);
+    height: calc(var(--cell-size) * 6 + var(--gap-size) * 5);
+}
+
 #connect4-board {
     display: grid;
-    grid-template-columns: repeat(7, 60px);
-    grid-template-rows: repeat(6, 60px);
-    gap: 5px;
-    margin: 0 auto;
-    width: max-content;
+    grid-template-columns: repeat(7, var(--cell-size));
+    grid-template-rows: repeat(6, var(--cell-size));
+    gap: var(--gap-size);
+    width: 100%;
+    height: 100%;
+    background-color: var(--board-color);
     position: relative; /* allow absolutely positioned falling discs */
 }
 
 #connect4-board .cell {
-    width: 60px;
-    height: 60px;
+    width: var(--cell-size);
+    height: var(--cell-size);
     border-radius: 50%;
-    border: 2px solid #6c757d;
-    background-color: #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-color: transparent;
     cursor: pointer;
 }
 
-#connect4-board .red {
+#connect4-board .cell.red {
     background-color: #dc3545;
 }
 
-#connect4-board .yellow {
+#connect4-board .cell.yellow {
     background-color: #ffc107;
+}
+
+/* board overlay with holes */
+#connect4-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
 }
 
 /* temporary disc used for drop animation */
 .drop-disc {
     position: absolute;
+    width: var(--cell-size);
+    height: var(--cell-size);
+    border-radius: 50%;
     transition: top 0.3s linear;
     pointer-events: none;
+    z-index: 1;
 }

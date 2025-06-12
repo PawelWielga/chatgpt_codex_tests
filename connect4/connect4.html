@@ -12,7 +12,10 @@
 <body>
     <div class="container py-5">
         <h1 class="text-center mb-4">Connect 4</h1>
-        <div id="connect4-board" class="mb-3 mx-auto"></div>
+        <div id="connect4-wrapper" class="mb-3 mx-auto position-relative">
+            <div id="connect4-board"></div>
+            <svg id="connect4-overlay"></svg>
+        </div>
         <p id="connect4-status" class="text-center"></p>
         <div class="text-center mt-3">
             <button id="connect4-reset" class="btn btn-primary">Nowa gra</button>
