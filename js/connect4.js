@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let board = [];
     let current = 'red';
     let gameOver = false;
+    let animating = false;
 
     function display(player) {
         return player === 'red' ? 'Czerwony' : 'Żółty';
@@ -27,26 +28,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         current = 'red';
         gameOver = false;
+        animating = false;
         statusP.textContent = `Tura: ${display(current)}`;
     }
 
     function handleMove(col) {
-        if (gameOver) return;
+        if (gameOver || animating) return;
         for (let r = rows - 1; r >= 0; r--) {
             if (!board[r][col]) {
-                board[r][col] = current;
                 const cell = boardDiv.querySelector(`[data-row='${r}'][data-col='${col}']`);
-                cell.classList.add(current);
-                if (checkWin(r, col)) {
-                    statusP.textContent = `Wygrywa ${display(current)}!`;
-                    gameOver = true;
-                } else if (board.every(row => row.every(c => c))) {
-                    statusP.textContent = 'Remis!';
-                    gameOver = true;
-                } else {
-                    current = current === 'red' ? 'yellow' : 'red';
-                    statusP.textContent = `Tura: ${display(current)}`;
-                }
+
+                animating = true;
+                const disc = document.createElement('div');
+                disc.className = `cell drop-disc ${current}`;
+                disc.style.left = cell.offsetLeft + 'px';
+                disc.style.top = '-70px';
+                boardDiv.appendChild(disc);
+
+                requestAnimationFrame(() => {
+                    disc.style.top = cell.offsetTop + 'px';
+                });
+
+                disc.addEventListener('transitionend', () => {
+                    boardDiv.removeChild(disc);
+                    board[r][col] = current;
+                    cell.classList.add(current);
+                    if (checkWin(r, col)) {
+                        statusP.textContent = `Wygrywa ${display(current)}!`;
+                        gameOver = true;
+                    } else if (board.every(row => row.every(c => c))) {
+                        statusP.textContent = 'Remis!';
+                        gameOver = true;
+                    } else {
+                        current = current === 'red' ? 'yellow' : 'red';
+                        statusP.textContent = `Tura: ${display(current)}`;
+                    }
+                    animating = false;
+                }, {once: true});
                 break;
             }
         }

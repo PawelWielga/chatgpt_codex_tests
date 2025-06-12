@@ -5,6 +5,7 @@
     gap: 5px;
     margin: 0 auto;
     width: max-content;
+    position: relative; /* allow absolutely positioned falling discs */
 }
 
 #connect4-board .cell {
@@ -25,4 +26,11 @@
 
 #connect4-board .yellow {
     background-color: #ffc107;
+}
+
+/* temporary disc used for drop animation */
+.drop-disc {
+    position: absolute;
+    transition: top 0.3s linear;
+    pointer-events: none;
 }
