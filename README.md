@@ -23,7 +23,8 @@ Bootstrap and Bootstrap Icons (loaded from a CDN) supply the basic layout and ic
 * **Tetris** – classic falling-block puzzle with on‑screen arrow controls.
 * **Connect 4** – two players drop red and yellow discs to line up four in a row. Online play now works through PeerJS using short 5-character codes – no local server needed.
 * **Pong** – classic paddle and ball game for two players.
+* **Gorący Ziemniak** – prosta gra imprezowa dla wielu osób. Jeden z graczy trzyma "ziemniaka" i musi przekazać go dalej nim upłynie czas.
 
-Most of the games are meant for local play but **Connect 4** and **Rock Paper Scissors** also allow remote matches using the connection helpers described above. No external server is required – the games communicate directly between browsers.
+Most of the games are meant for local play but **Connect 4**, **Rock Paper Scissors** and **Gorący Ziemniak** also allow remote matches using the connection helpers described above. No external server is required – the games communicate directly between browsers.
 
 The repository is entirely static so it can be hosted on GitHub Pages or any basic web server without a build step. Feel free to browse the source code for each mini-game to see straightforward implementations of classic browser games.
