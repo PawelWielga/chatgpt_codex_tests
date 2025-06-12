@@ -30,3 +30,11 @@ body > footer {
     display: inline-flex;
     align-items: center;
 }
+
+/* Position the help button in the top-right corner of game containers */
+.help-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0.5rem;
+}
