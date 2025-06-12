@@ -6,10 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetBtn = document.getElementById('connect4-reset');
     const hostBtn = document.getElementById('host-btn');
     const joinBtn = document.getElementById('join-btn');
+    const connect4Online = document.getElementById('connect4-online');
     const qrContainer = document.getElementById('qr-container');
     const qrText = document.getElementById('qr-text');
     const namesHeading = document.getElementById('player-names');
     const infoP = document.getElementById('player-info');
+    const modeSelect = document.getElementById('mode-select');
     const rows = 6;
     const cols = 7;
     const styles = getComputedStyle(document.documentElement);
@@ -45,6 +47,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function updateInfo() {
+        if (infoP) {
+            const badge = `<span class="badge" style="background-color: ${players.red.color}; color: #fff;">${players.red.name} ${players.red.emoji}</span>`;
+            infoP.innerHTML = `Grasz jako ${badge}`;
+        }
+    }
+
+    function setMode(newMode) {
+        mode = newMode;
+        connect4Online.style.display = newMode === 'online' ? 'block' : 'none';
+        if (newMode !== 'online') {
+            dc = null;
+            qrContainer.style.display = 'none';
+            namesHeading.style.display = 'none';
+            players.red.name = playerSettings.name;
+            players.red.color = playerSettings.color;
+            players.red.emoji = playerSettings.emoji;
+            if (newMode === 'ai') {
+                players.yellow.name = 'Komputer';
+                players.yellow.color = '#ffc107';
+                players.yellow.emoji = '💻';
+            } else {
+                players.yellow.name = 'Żółty';
+                players.yellow.color = '#ffc107';
+                players.yellow.emoji = '🐱';
+            }
+            createBoard();
+            updateNamesDisplay();
+            updateInfo();
+        } else {
+            statusP.textContent = '';
+            updateInfo();
+        }
+    }
+
     function setupDataChannel() {
         dc.on('data', data => {
             const msg = JSON.parse(data);
@@ -77,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         players.red.name = myName;
         players.red.color = playerSettings.color;
         players.red.emoji = playerSettings.emoji;
+        updateInfo();
         qrContainer.style.display = 'block';
         const elems = { text: qrText };
         const conn = await CodeConnect.host(elems);
@@ -98,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         players.yellow.name = myName;
         players.yellow.color = playerSettings.color;
         players.yellow.emoji = playerSettings.emoji;
+        updateInfo();
         qrContainer.style.display = 'block';
         const elems = { text: qrText };
         const conn = await CodeConnect.join(elems);
@@ -239,6 +278,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     animating = false;
+                    if (mode === 'ai' && !gameOver && current === 'yellow') {
+                        setTimeout(aiMove, 300);
+                    }
                 }, {once: true});
                 if (mode === 'remote' && !remote) {
                     dc.send(JSON.stringify({type:'move', col}));
@@ -273,6 +315,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function checkVirtualWin(b, r, c) {
+        const color = b[r][c];
+        const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+        for (const [dr,dc] of dirs) {
+            let count = 1;
+            let nr = r+dr, nc = c+dc;
+            while (nr>=0 && nr<rows && nc>=0 && nc<cols && b[nr][nc] === color) { count++; nr+=dr; nc+=dc; }
+            nr = r-dr; nc = c-dc;
+            while (nr>=0 && nr<rows && nc>=0 && nc<cols && b[nr][nc] === color) { count++; nr-=dr; nc-=dc; }
+            if (count >= 4) return true;
+        }
+        return false;
+    }
+
+    function chooseAIMove() {
+        const available = [];
+        for (let c=0;c<cols;c++) {
+            for (let r=rows-1;r>=0;r--) {
+                if (!board[r][c]) { available.push({c,r}); break; }
+            }
+        }
+        for (const {c,r} of available) {
+            board[r][c] = 'yellow';
+            if (checkVirtualWin(board, r, c)) { board[r][c] = null; return c; }
+            board[r][c] = null;
+        }
+        for (const {c,r} of available) {
+            board[r][c] = 'red';
+            if (checkVirtualWin(board, r, c)) { board[r][c] = null; return c; }
+            board[r][c] = null;
+        }
+        const opts = available.map(o=>o.c);
+        return opts[Math.floor(Math.random()*opts.length)];
+    }
+
+    function aiMove() {
+        if (gameOver) return;
+        const col = chooseAIMove();
+        if (col !== undefined) {
+            handleMove(col);
+        }
+    }
+
     resetBtn.addEventListener('click', () => {
         createBoard();
         if (mode === 'remote' && dc) {
@@ -282,12 +367,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     hostBtn.addEventListener('click', startHost);
     joinBtn.addEventListener('click', startJoin);
+    modeSelect.addEventListener('change', () => setMode(modeSelect.value));
     window.addEventListener('resize', resizeBoard);
     resizeBoard();
-    createBoard();
-    updateNamesDisplay();
-    if (infoP) {
-        const badge = `<span class="badge" style="background-color: ${playerSettings.color}; color: #fff;">${playerSettings.name} ${playerSettings.emoji}</span>`;
-        infoP.innerHTML = `Grasz jako ${badge}`;
-    }
+    setMode('local');
 });

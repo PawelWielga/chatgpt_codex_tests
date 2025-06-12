@@ -21,7 +21,7 @@ Bootstrap and Bootstrap Icons (loaded from a CDN) supply the basic layout and ic
 * **Saper** – classic Minesweeper. Uncover all safe fields without detonating a mine.
 * **Catculator** – basic calculator with pink and purple theme. The digit buttons are styled as cute cat heads.
 * **Tetris** – classic falling-block puzzle with on‑screen arrow controls.
-* **Connect 4** – two players drop red and yellow discs to line up four in a row. Online play now works through PeerJS using short 5-character codes – no local server needed.
+* **Connect 4** – drop discs to line up four in a row. You can play locally against another person, challenge the computer or set up an online match via PeerJS using short 5-character codes – no local server needed.
 * **Pong** – classic paddle and ball game for two players.
 * **Gorący Ziemniak** – prosta gra imprezowa dla wielu osób. Jeden z graczy trzyma "ziemniaka" i musi przekazać go dalej nim upłynie czas.
 
