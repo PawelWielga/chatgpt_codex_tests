@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
     for (const s of suits) {
         for (const r of ranks) {
             const card = document.createElement('div');
-            card.className = 'card';
-            card.textContent = `${r}${s}`;
+            card.className = 'card back';
+            card.textContent = '';
             card.style.transform = `translate(-50%, -50%) translateY(${-offset}px)`;
-            offset += 2;
+            offset += 1;
             deckDiv.appendChild(card);
         }
     }
