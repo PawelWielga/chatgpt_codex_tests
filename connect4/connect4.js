@@ -8,19 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const joinBtn = document.getElementById('join-btn');
     const qrContainer = document.getElementById('qr-container');
     const qrText = document.getElementById('qr-text');
-    const nameInput = document.getElementById('player-name');
     const namesHeading = document.getElementById('player-names');
+    const infoP = document.getElementById('player-info');
     const rows = 6;
     const cols = 7;
     const styles = getComputedStyle(document.documentElement);
     const boardColor = styles.getPropertyValue('--board-color').trim();
     const borderColor = styles.getPropertyValue('--border-color').trim();
-    const emojis = [
-        "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁",
-        "🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🐣","🐥","🦆",
-        "🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐌",
-        "🐞","🐜","🪲","🪳","🐢","🐍","🦎","🦂","🕷"
-    ];
     let mode = 'local';
     let isHost = false;
     let isMyTurn = false;
@@ -34,19 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let padSize = 5;
     let myName = '';
     let opponentName = '';
-    let playerNameRed = 'Czerwony';
-    let playerNameYellow = 'Żółty';
+    loadPlayerSettings();
+    const players = {
+        red: { name: playerSettings.name, color: playerSettings.color, emoji: playerSettings.emoji },
+        yellow: { name: 'Żółty', color: '#ffc107', emoji: '🐱' }
+    };
 
     function display(player) {
-        if (player === 'red') {
-            return playerNameRed;
-        }
-        return playerNameYellow;
+        return players[player].name;
     }
 
     function updateNamesDisplay() {
         if (namesHeading) {
-            namesHeading.textContent = `${playerNameRed} vs ${playerNameYellow}`;
+            namesHeading.textContent = `${players.red.name} vs ${players.yellow.name}`;
             namesHeading.style.display = 'block';
         }
     }
@@ -62,9 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (msg.type === 'name') {
                 opponentName = msg.name;
                 if (isHost) {
-                    playerNameYellow = opponentName;
+                    players.yellow.name = opponentName;
+                    if (msg.color) players.yellow.color = msg.color;
+                    if (msg.emoji) players.yellow.emoji = msg.emoji;
                 } else {
-                    playerNameRed = opponentName;
+                    players.red.name = opponentName;
+                    if (msg.color) players.red.color = msg.color;
+                    if (msg.emoji) players.red.emoji = msg.emoji;
                 }
                 updateNamesDisplay();
             }
@@ -75,8 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isHost = true;
         isMyTurn = true;
         mode = 'remote';
-        myName = nameInput.value.trim() || 'Gracz 1';
-        playerNameRed = myName;
+        myName = playerSettings.name;
+        players.red.name = myName;
+        players.red.color = playerSettings.color;
+        players.red.emoji = playerSettings.emoji;
         qrContainer.style.display = 'block';
         const elems = { text: qrText };
         const conn = await CodeConnect.host(elems);
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!conn) return;
         dc = conn.dc;
         setupDataChannel();
-        dc.send(JSON.stringify({type:'name', name: myName}));
+        dc.send(JSON.stringify({type:'name', name: myName, color: players.red.color, emoji: players.red.emoji}));
         createBoard();
         statusP.textContent = `Tura: ${display(current)}`;
         updateNamesDisplay();
@@ -94,8 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isHost = false;
         isMyTurn = false;
         mode = 'remote';
-        myName = nameInput.value.trim() || 'Gracz 2';
-        playerNameYellow = myName;
+        myName = playerSettings.name;
+        players.yellow.name = myName;
+        players.yellow.color = playerSettings.color;
+        players.yellow.emoji = playerSettings.emoji;
         qrContainer.style.display = 'block';
         const elems = { text: qrText };
         const conn = await CodeConnect.join(elems);
@@ -103,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!conn) return;
         dc = conn.dc;
         setupDataChannel();
-        dc.send(JSON.stringify({type:'name', name: myName}));
+        dc.send(JSON.stringify({type:'name', name: myName, color: players.yellow.color, emoji: players.yellow.emoji}));
         createBoard();
         statusP.textContent = `Tura: ${display(current)}`;
         updateNamesDisplay();
@@ -206,8 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 animating = true;
                 const disc = document.createElement('div');
-                disc.className = `cell drop-disc ${current}`;
-                const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                disc.className = 'cell drop-disc';
+                disc.style.backgroundColor = players[current].color;
+                const emoji = players[current].emoji;
                 disc.textContent = emoji;
                 disc.style.left = cell.offsetLeft + 'px';
                 disc.style.top = -cellSize + 'px';
@@ -220,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 disc.addEventListener('transitionend', () => {
                     boardDiv.removeChild(disc);
                     board[r][col] = current;
-                    cell.classList.add(current);
+                    cell.style.backgroundColor = players[current].color;
                     cell.textContent = emoji;
                     if (checkWin(r, col)) {
                         statusP.textContent = `Wygrywa ${display(current)}!`;
@@ -283,4 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resizeBoard();
     createBoard();
     updateNamesDisplay();
+    if (infoP) {
+        infoP.textContent = `Grasz jako ${playerSettings.name} ${playerSettings.emoji}`;
+    }
 });

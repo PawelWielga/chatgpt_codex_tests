@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnDown = document.getElementById('snake-down');
     const btnLeft = document.getElementById('snake-left');
     const btnRight = document.getElementById('snake-right');
+    const playerSpan = document.getElementById('snake-player');
+    loadPlayerSettings();
+    if (playerSpan) {
+        playerSpan.textContent = `${playerSettings.name} ${playerSettings.emoji}`;
+    }
     const size = 20;
     let cells = [];
     let snake = [];
