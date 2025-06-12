@@ -12,20 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let animating = false;
     let cellSize = 60;
     let gapSize = 5;
+    let padSize = 5;
 
     function display(player) {
         return player === 'red' ? 'Czerwony' : 'Żółty';
     }
 
     function resizeBoard() {
-        const ratio = 5 / 60;
+        const ratio = 10 / 60;
         const maxWidth = Math.min(window.innerWidth - 20, 450);
-        cellSize = Math.floor(maxWidth / (cols + (cols - 1) * ratio));
+        const denom = cols + (cols - 1) * ratio + 2 * ratio;
+        cellSize = Math.floor(maxWidth / denom);
         gapSize = Math.round(cellSize * ratio);
-        const boardWidth = cellSize * cols + gapSize * (cols - 1);
-        const boardHeight = cellSize * rows + gapSize * (rows - 1);
+        padSize = gapSize;
+        const boardWidth = cellSize * cols + gapSize * (cols - 1) + padSize * 2;
+        const boardHeight = cellSize * rows + gapSize * (rows - 1) + padSize * 2;
         document.documentElement.style.setProperty('--cell-size', `${cellSize}px`);
         document.documentElement.style.setProperty('--gap-size', `${gapSize}px`);
+        document.documentElement.style.setProperty('--board-padding', `${padSize}px`);
         wrapperDiv.style.width = boardWidth + 'px';
         wrapperDiv.style.height = boardHeight + 'px';
         drawOverlay();
@@ -49,8 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const circle = document.createElementNS(ns, 'circle');
-                circle.setAttribute('cx', c * (cellSize + gapSize) + cellSize / 2);
-                circle.setAttribute('cy', r * (cellSize + gapSize) + cellSize / 2);
+                circle.setAttribute('cx', padSize + c * (cellSize + gapSize) + cellSize / 2);
+                circle.setAttribute('cy', padSize + r * (cellSize + gapSize) + cellSize / 2);
                 circle.setAttribute('r', cellSize / 2);
                 circle.setAttribute('fill', 'black');
                 mask.appendChild(circle);
@@ -62,15 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const boardRect = document.createElementNS(ns, 'rect');
         boardRect.setAttribute('width', '100%');
         boardRect.setAttribute('height', '100%');
-        boardRect.setAttribute('fill', '#0d6efd');
+        boardRect.setAttribute('fill', '#6c757d');
         boardRect.setAttribute('mask', 'url(#holes)');
         overlaySvg.appendChild(boardRect);
 
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const outline = document.createElementNS(ns, 'circle');
-                outline.setAttribute('cx', c * (cellSize + gapSize) + cellSize / 2);
-                outline.setAttribute('cy', r * (cellSize + gapSize) + cellSize / 2);
+                outline.setAttribute('cx', padSize + c * (cellSize + gapSize) + cellSize / 2);
+                outline.setAttribute('cy', padSize + r * (cellSize + gapSize) + cellSize / 2);
                 outline.setAttribute('r', cellSize / 2);
                 outline.setAttribute('fill', 'none');
                 outline.setAttribute('stroke', '#6c757d');
