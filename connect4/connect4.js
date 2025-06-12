@@ -6,6 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetBtn = document.getElementById('connect4-reset');
     const rows = 6;
     const cols = 7;
+    const styles = getComputedStyle(document.documentElement);
+    const boardColor = styles.getPropertyValue('--board-color').trim();
+    const borderColor = styles.getPropertyValue('--border-color').trim();
+    const emojis = [
+        "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁",
+        "🐮","🐷","🐸","🐵","🐔","🐧","🐦","🐤","🐣","🐥","🦆",
+        "🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐌",
+        "🐞","🐜","🪲","🪳","🐢","🐍","🦎","🦂","🕷"
+    ];
     let board = [];
     let current = 'red';
     let gameOver = false;
@@ -66,7 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const boardRect = document.createElementNS(ns, 'rect');
         boardRect.setAttribute('width', '100%');
         boardRect.setAttribute('height', '100%');
-        boardRect.setAttribute('fill', '#6c757d');
+        boardRect.setAttribute('fill', boardColor);
+        boardRect.setAttribute('stroke', borderColor);
+        boardRect.setAttribute('stroke-width', '4');
         boardRect.setAttribute('mask', 'url(#holes)');
         overlaySvg.appendChild(boardRect);
 
@@ -77,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 outline.setAttribute('cy', padSize + r * (cellSize + gapSize) + cellSize / 2);
                 outline.setAttribute('r', cellSize / 2);
                 outline.setAttribute('fill', 'none');
-                outline.setAttribute('stroke', '#6c757d');
+                outline.setAttribute('stroke', borderColor);
                 outline.setAttribute('stroke-width', '2');
                 overlaySvg.appendChild(outline);
             }
@@ -93,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 div.className = 'cell';
                 div.dataset.row = r;
                 div.dataset.col = c;
+                div.textContent = '';
                 div.addEventListener('click', () => handleMove(c));
                 boardDiv.appendChild(div);
             }
@@ -112,6 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 animating = true;
                 const disc = document.createElement('div');
                 disc.className = `cell drop-disc ${current}`;
+                const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                disc.textContent = emoji;
                 disc.style.left = cell.offsetLeft + 'px';
                 disc.style.top = -cellSize + 'px';
                 boardDiv.appendChild(disc);
@@ -124,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     boardDiv.removeChild(disc);
                     board[r][col] = current;
                     cell.classList.add(current);
+                    cell.textContent = emoji;
                     if (checkWin(r, col)) {
                         statusP.textContent = `Wygrywa ${display(current)}!`;
                         gameOver = true;
