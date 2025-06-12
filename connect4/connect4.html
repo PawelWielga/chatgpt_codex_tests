@@ -12,6 +12,9 @@
 <body>
     <div class="container py-5">
         <h1 class="text-center mb-4">Connect 4</h1>
+        <div class="text-center mb-3">
+            <input id="player-name" type="text" class="form-control d-inline-block w-auto" placeholder="Twoje imię">
+        </div>
         <div id="connect4-online" class="text-center mb-4">
             <button id="host-btn" class="btn btn-success">Utwórz grę (host)</button>
             <button id="join-btn" class="btn btn-warning ms-2">Dołącz do gry</button>
@@ -19,6 +22,7 @@
         <div id="qr-container" class="text-center mb-4" style="display:none;">
             <p id="qr-text" class="mt-2"></p>
         </div>
+        <h4 id="player-names" class="text-center mb-3" style="display:none;"></h4>
         <div id="connect4-wrapper" class="mb-3 mx-auto position-relative">
             <div id="connect4-board"></div>
             <svg id="connect4-overlay"></svg>

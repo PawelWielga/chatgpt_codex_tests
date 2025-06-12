@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const joinBtn = document.getElementById('join-btn');
     const qrContainer = document.getElementById('qr-container');
     const qrText = document.getElementById('qr-text');
+    const nameInput = document.getElementById('player-name');
+    const namesHeading = document.getElementById('player-names');
     const rows = 6;
     const cols = 7;
     const styles = getComputedStyle(document.documentElement);
@@ -30,9 +32,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let cellSize = 60;
     let gapSize = 5;
     let padSize = 5;
+    let myName = '';
+    let opponentName = '';
+    let playerNameRed = 'Czerwony';
+    let playerNameYellow = 'Żółty';
 
     function display(player) {
-        return player === 'red' ? 'Czerwony' : 'Żółty';
+        if (player === 'red') {
+            return playerNameRed;
+        }
+        return playerNameYellow;
+    }
+
+    function updateNamesDisplay() {
+        if (namesHeading) {
+            namesHeading.textContent = `${playerNameRed} vs ${playerNameYellow}`;
+            namesHeading.style.display = 'block';
+        }
     }
 
     function setupDataChannel() {
@@ -43,6 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (msg.type === 'reset') {
                 createBoard();
                 isMyTurn = isHost;
+            } else if (msg.type === 'name') {
+                opponentName = msg.name;
+                if (isHost) {
+                    playerNameYellow = opponentName;
+                } else {
+                    playerNameRed = opponentName;
+                }
+                updateNamesDisplay();
             }
         });
     }
@@ -51,6 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
         isHost = true;
         isMyTurn = true;
         mode = 'remote';
+        myName = nameInput.value.trim() || 'Gracz 1';
+        playerNameRed = myName;
         qrContainer.style.display = 'block';
         const elems = { text: qrText };
         const conn = await CodeConnect.host(elems);
@@ -58,14 +84,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!conn) return;
         dc = conn.dc;
         setupDataChannel();
+        dc.send(JSON.stringify({type:'name', name: myName}));
         createBoard();
         statusP.textContent = `Tura: ${display(current)}`;
+        updateNamesDisplay();
     }
 
     async function startJoin() {
         isHost = false;
         isMyTurn = false;
         mode = 'remote';
+        myName = nameInput.value.trim() || 'Gracz 2';
+        playerNameYellow = myName;
         qrContainer.style.display = 'block';
         const elems = { text: qrText };
         const conn = await CodeConnect.join(elems);
@@ -73,8 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!conn) return;
         dc = conn.dc;
         setupDataChannel();
+        dc.send(JSON.stringify({type:'name', name: myName}));
         createBoard();
         statusP.textContent = `Tura: ${display(current)}`;
+        updateNamesDisplay();
     }
 
     function resizeBoard() {
@@ -250,4 +282,5 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resizeBoard);
     resizeBoard();
     createBoard();
+    updateNamesDisplay();
 });
