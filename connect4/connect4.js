@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let isMyTurn = false;
     let pc = null;
     let dc = null;
-    let scanner = null;
     let board = [];
     let current = 'red';
     let gameOver = false;
@@ -51,81 +50,30 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    function waitForIce(pc) {
-        return new Promise(res => {
-            if (pc.iceGatheringState === 'complete') {
-                res();
-            } else {
-                pc.onicegatheringstatechange = () => {
-                    if (pc.iceGatheringState === 'complete') res();
-                };
-            }
-        });
-    }
-
     async function startHost() {
         isHost = true;
         isMyTurn = true;
         mode = 'remote';
-        pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
-        dc = pc.createDataChannel('c4');
+        const elems = {container: qrContainer, canvas: qrCanvas, video: qrVideo, text: qrText};
+        const conn = await QrConnect.host(elems, 'c4');
+        pc = conn.pc;
+        dc = conn.dc;
         setupDataChannel();
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        await waitForIce(pc);
-        showQr(JSON.stringify(pc.localDescription));
-        qrText.textContent = 'Poczekaj na odpowiedź i zeskanuj kod';
-        pc.ondatachannel = e => { dc = e.channel; setupDataChannel(); };
+        createBoard();
+        statusP.textContent = `Tura: ${display(current)}`;
     }
 
     async function startJoin() {
         isHost = false;
         isMyTurn = false;
         mode = 'remote';
-        pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
-        pc.ondatachannel = e => { dc = e.channel; setupDataChannel(); };
-        qrText.textContent = 'Zeskanuj kod hosta';
-        startScan(async data => {
-            stopScan();
-            const desc = JSON.parse(data);
-            await pc.setRemoteDescription(desc);
-            const answer = await pc.createAnswer();
-            await pc.setLocalDescription(answer);
-            await waitForIce(pc);
-            showQr(JSON.stringify(pc.localDescription));
-            qrText.textContent = 'Pokaż ten kod hostowi';
-        });
-    }
-
-    function showQr(text) {
-        qrContainer.style.display = 'block';
-        qrCanvas.style.display = 'block';
-        qrVideo.style.display = 'none';
-        QRCode.toCanvas(qrCanvas, text);
-        startScan(async data => {
-            stopScan();
-            const desc = JSON.parse(data);
-            await pc.setRemoteDescription(desc);
-            qrContainer.style.display = 'none';
-            createBoard();
-            statusP.textContent = `Tura: ${display(current)}`;
-        });
-    }
-
-    function startScan(callback) {
-        qrContainer.style.display = 'block';
-        qrCanvas.style.display = 'none';
-        qrVideo.style.display = 'block';
-        scanner = new QrScanner(qrVideo, result => callback(result.data));
-        scanner.start();
-    }
-
-    function stopScan() {
-        if (scanner) {
-            scanner.stop();
-            scanner.destroy();
-            scanner = null;
-        }
+        const elems = {container: qrContainer, canvas: qrCanvas, video: qrVideo, text: qrText};
+        const conn = await QrConnect.join(elems, 'c4');
+        pc = conn.pc;
+        dc = conn.dc;
+        setupDataChannel();
+        createBoard();
+        statusP.textContent = `Tura: ${display(current)}`;
     }
 
     function resizeBoard() {
