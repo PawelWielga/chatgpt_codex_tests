@@ -36,15 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupDataChannel() {
-        dc.onmessage = e => {
-            const msg = JSON.parse(e.data);
+        dc.on('data', data => {
+            const msg = JSON.parse(data);
             if (msg.type === 'move') {
                 handleMove(msg.col, true);
             } else if (msg.type === 'reset') {
                 createBoard();
                 isMyTurn = isHost;
             }
-        };
+        });
     }
 
     async function startHost() {
