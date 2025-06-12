@@ -4,6 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlaySvg = document.getElementById('connect4-overlay');
     const statusP = document.getElementById('connect4-status');
     const resetBtn = document.getElementById('connect4-reset');
+    const hostBtn = document.getElementById('host-btn');
+    const joinBtn = document.getElementById('join-btn');
+    const qrContainer = document.getElementById('qr-container');
+    const qrCanvas = document.getElementById('qr-canvas');
+    const qrVideo = document.getElementById('qr-video');
+    const qrText = document.getElementById('qr-text');
     const rows = 6;
     const cols = 7;
     const styles = getComputedStyle(document.documentElement);
@@ -15,6 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
         "🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋","🐌",
         "🐞","🐜","🪲","🪳","🐢","🐍","🦎","🦂","🕷"
     ];
+    let mode = 'local';
+    let isHost = false;
+    let isMyTurn = false;
+    let pc = null;
+    let dc = null;
+    let scanner = null;
     let board = [];
     let current = 'red';
     let gameOver = false;
@@ -25,6 +37,95 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function display(player) {
         return player === 'red' ? 'Czerwony' : 'Żółty';
+    }
+
+    function setupDataChannel() {
+        dc.onmessage = e => {
+            const msg = JSON.parse(e.data);
+            if (msg.type === 'move') {
+                handleMove(msg.col, true);
+            } else if (msg.type === 'reset') {
+                createBoard();
+                isMyTurn = isHost;
+            }
+        };
+    }
+
+    function waitForIce(pc) {
+        return new Promise(res => {
+            if (pc.iceGatheringState === 'complete') {
+                res();
+            } else {
+                pc.onicegatheringstatechange = () => {
+                    if (pc.iceGatheringState === 'complete') res();
+                };
+            }
+        });
+    }
+
+    async function startHost() {
+        isHost = true;
+        isMyTurn = true;
+        mode = 'remote';
+        pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+        dc = pc.createDataChannel('c4');
+        setupDataChannel();
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        await waitForIce(pc);
+        showQr(JSON.stringify(pc.localDescription));
+        qrText.textContent = 'Poczekaj na odpowiedź i zeskanuj kod';
+        pc.ondatachannel = e => { dc = e.channel; setupDataChannel(); };
+    }
+
+    async function startJoin() {
+        isHost = false;
+        isMyTurn = false;
+        mode = 'remote';
+        pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+        pc.ondatachannel = e => { dc = e.channel; setupDataChannel(); };
+        qrText.textContent = 'Zeskanuj kod hosta';
+        startScan(async data => {
+            stopScan();
+            const desc = JSON.parse(data);
+            await pc.setRemoteDescription(desc);
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            await waitForIce(pc);
+            showQr(JSON.stringify(pc.localDescription));
+            qrText.textContent = 'Pokaż ten kod hostowi';
+        });
+    }
+
+    function showQr(text) {
+        qrContainer.style.display = 'block';
+        qrCanvas.style.display = 'block';
+        qrVideo.style.display = 'none';
+        QRCode.toCanvas(qrCanvas, text);
+        startScan(async data => {
+            stopScan();
+            const desc = JSON.parse(data);
+            await pc.setRemoteDescription(desc);
+            qrContainer.style.display = 'none';
+            createBoard();
+            statusP.textContent = `Tura: ${display(current)}`;
+        });
+    }
+
+    function startScan(callback) {
+        qrContainer.style.display = 'block';
+        qrCanvas.style.display = 'none';
+        qrVideo.style.display = 'block';
+        scanner = new QrScanner(qrVideo, result => callback(result.data));
+        scanner.start();
+    }
+
+    function stopScan() {
+        if (scanner) {
+            scanner.stop();
+            scanner.destroy();
+            scanner = null;
+        }
     }
 
     function resizeBoard() {
@@ -115,8 +216,9 @@ document.addEventListener('DOMContentLoaded', () => {
         statusP.textContent = `Tura: ${display(current)}`;
     }
 
-    function handleMove(col) {
+    function handleMove(col, remote = false) {
         if (gameOver || animating) return;
+        if (mode === 'remote' && !remote && !isMyTurn) return;
         for (let r = rows - 1; r >= 0; r--) {
             if (!board[r][col]) {
                 const cell = boardDiv.querySelector(`[data-row='${r}'][data-col='${col}']`);
@@ -148,9 +250,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         current = current === 'red' ? 'yellow' : 'red';
                         statusP.textContent = `Tura: ${display(current)}`;
+                        if (mode === 'remote') {
+                            isMyTurn = !isMyTurn;
+                        }
                     }
                     animating = false;
                 }, {once: true});
+                if (mode === 'remote' && !remote) {
+                    dc.send(JSON.stringify({type:'move', col}));
+                }
                 break;
             }
         }
@@ -181,7 +289,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    resetBtn.addEventListener('click', createBoard);
+    resetBtn.addEventListener('click', () => {
+        createBoard();
+        if (mode === 'remote' && dc) {
+            dc.send(JSON.stringify({type:'reset'}));
+            isMyTurn = isHost;
+        }
+    });
+    hostBtn.addEventListener('click', startHost);
+    joinBtn.addEventListener('click', startJoin);
     window.addEventListener('resize', resizeBoard);
     resizeBoard();
     createBoard();
