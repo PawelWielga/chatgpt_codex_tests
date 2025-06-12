@@ -24,7 +24,7 @@ Bootstrap and Bootstrap Icons (loaded from a CDN) supply the basic layout and ic
 * **Connect 4** – drop discs to line up four in a row. You can play locally against another person, challenge the computer or set up an online match via PeerJS using short 5-character codes – no local server needed.
 * **Pong** – classic paddle and ball game for two players.
 * **Gorący Ziemniak** – prosta gra imprezowa dla wielu osób. Jeden z graczy trzyma "ziemniaka" i musi przekazać go dalej nim upłynie czas.
-* **Karty** – prezentacja talii z możliwością rozdania kart online między dwoma graczami.
+* **Karty** – prezentacja talii z możliwością rozdania kart online między dwoma graczami. Karty gracza leżą pod stołem, a te należące do rywala są widoczne rewersem nad stołem.
 
 Most of the games are meant for local play but **Connect 4**, **Rock Paper Scissors** and **Gorący Ziemniak** also allow remote matches using the connection helpers described above. No external server is required – the games communicate directly between browsers.
 

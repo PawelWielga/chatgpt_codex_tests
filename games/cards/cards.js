@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const deckDiv = document.getElementById('deck');
     const handDiv = document.getElementById('my-hand');
+    const oppHandDiv = document.getElementById('opp-hand');
     const hostBtn = document.getElementById('cg-host');
     const joinBtn = document.getElementById('cg-join');
     const qrDiv = document.getElementById('cg-qr');
@@ -55,31 +56,39 @@ document.addEventListener('DOMContentLoaded', () => {
         shuffle(deck);
     }
 
-    function createCard(text) {
+    function createCard(text, back = false) {
         const c = document.createElement('div');
         c.className = 'card';
+        if (back) c.classList.add('back');
         c.textContent = text;
         return c;
     }
 
-    function dealAnimation(cards) {
+
+    function dealAnimation(cards, target = handDiv, faceUp = true) {
+
         let offset = 0;
         const tableRect = deckDiv.parentElement.getBoundingClientRect();
         const deckRect = deckDiv.getBoundingClientRect();
         cards.forEach(card => {
             const temp = document.createElement('div');
             temp.className = 'deal-card';
-            temp.textContent = card;
+
+            if (!faceUp) temp.classList.add('back');
+            temp.textContent = faceUp ? card : '';
             temp.style.left = (deckRect.left - tableRect.left) + 'px';
             temp.style.top = (deckRect.top - tableRect.top) + 'px';
             deckDiv.parentElement.appendChild(temp);
-            const targetX = handDiv.offsetLeft + offset;
-            const targetY = handDiv.offsetTop;
+            const targetX = target.offsetLeft + offset;
+            const targetY = target.offsetTop;
+
             requestAnimationFrame(() => {
                 temp.style.transform = `translate(${targetX - (deckRect.left - tableRect.left)}px, ${targetY - (deckRect.top - tableRect.top)}px)`;
             });
             temp.addEventListener('transitionend', () => {
-                handDiv.appendChild(createCard(card));
+
+                target.appendChild(createCard(faceUp ? card : '', !faceUp));
+
                 temp.remove();
             }, { once: true });
             offset += 70;
@@ -93,7 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 opponentName = msg.name;
                 updateNames();
                 myCards = msg.cards;
-                dealAnimation(myCards);
+
+                dealAnimation(myCards, handDiv, true);
+                dealAnimation(new Array(myCards.length).fill(''), oppHandDiv, false);
+
             } else if (msg.type === 'name') {
                 opponentName = msg.name;
                 updateNames();
@@ -112,7 +124,10 @@ document.addEventListener('DOMContentLoaded', () => {
         myCards = deck.splice(0, 4);
         const oppCards = deck.splice(0, 4);
         dc.send(JSON.stringify({ type: 'start', name: myName, cards: oppCards }));
-        dealAnimation(myCards);
+
+        dealAnimation(myCards, handDiv, true);
+        dealAnimation(new Array(oppCards.length).fill(''), oppHandDiv, false);
+
         updateNames();
     }
 
