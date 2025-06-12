@@ -2,7 +2,8 @@
     --cell-size: 60px;
     --gap-size: 5px;
     --board-padding: 5px;
-    --board-color: #6c757d;
+    --board-color: #adb5bd;
+    --border-color: #6c757d;
 }
 
 #connect4-wrapper {
@@ -29,6 +30,10 @@
     border-radius: 50%;
     background-color: transparent;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--cell-size) * 0.6);
 }
 
 #connect4-board .cell.red {
@@ -59,4 +64,8 @@
     transition: top 0.6s linear;
     pointer-events: none;
     z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--cell-size) * 0.6);
 }
