@@ -10,6 +10,17 @@ body {
     background-color: #f8f9fa;
 }
 
+/* Center icons inside badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge .bi {
+    margin: 0 !important;
+}
+
 body > footer {
     margin-top: auto;
 }
