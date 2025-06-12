@@ -64,13 +64,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return c;
     }
 
+
     function dealAnimation(cards, target = handDiv, faceUp = true) {
+
         let offset = 0;
         const tableRect = deckDiv.parentElement.getBoundingClientRect();
         const deckRect = deckDiv.getBoundingClientRect();
         cards.forEach(card => {
             const temp = document.createElement('div');
             temp.className = 'deal-card';
+
             if (!faceUp) temp.classList.add('back');
             temp.textContent = faceUp ? card : '';
             temp.style.left = (deckRect.left - tableRect.left) + 'px';
@@ -78,11 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
             deckDiv.parentElement.appendChild(temp);
             const targetX = target.offsetLeft + offset;
             const targetY = target.offsetTop;
+
             requestAnimationFrame(() => {
                 temp.style.transform = `translate(${targetX - (deckRect.left - tableRect.left)}px, ${targetY - (deckRect.top - tableRect.top)}px)`;
             });
             temp.addEventListener('transitionend', () => {
+
                 target.appendChild(createCard(faceUp ? card : '', !faceUp));
+
                 temp.remove();
             }, { once: true });
             offset += 70;
@@ -96,8 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 opponentName = msg.name;
                 updateNames();
                 myCards = msg.cards;
+
                 dealAnimation(myCards, handDiv, true);
                 dealAnimation(new Array(myCards.length).fill(''), oppHandDiv, false);
+
             } else if (msg.type === 'name') {
                 opponentName = msg.name;
                 updateNames();
@@ -116,8 +124,10 @@ document.addEventListener('DOMContentLoaded', () => {
         myCards = deck.splice(0, 4);
         const oppCards = deck.splice(0, 4);
         dc.send(JSON.stringify({ type: 'start', name: myName, cards: oppCards }));
+
         dealAnimation(myCards, handDiv, true);
         dealAnimation(new Array(oppCards.length).fill(''), oppHandDiv, false);
+
         updateNames();
     }
 
