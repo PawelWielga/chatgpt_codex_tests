@@ -20,4 +20,8 @@ function savePlayerSettings() {
     localStorage.setItem('playerSettings', JSON.stringify(playerSettings));
 }
 
+window.playerSettings = playerSettings;
+window.loadPlayerSettings = loadPlayerSettings;
+window.savePlayerSettings = savePlayerSettings;
+
 loadPlayerSettings();
