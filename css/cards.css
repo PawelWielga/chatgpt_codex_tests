@@ -23,6 +23,31 @@
     transform: translate(-50%, -50%);
 }
 
+#board {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: grid;
+    grid-template-columns: repeat(3, 60px);
+    grid-template-rows: repeat(3, 90px);
+    gap: 10px;
+    pointer-events: none;
+}
+
+.board-slot {
+    width: 60px;
+    height: 90px;
+    border: 2px dashed rgba(255,255,255,0.6);
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.board-slot.available {
+    opacity: 1;
+}
+
 .hand {
     position: absolute;
 
@@ -60,6 +85,10 @@
 .hand .playing-card {
     position: relative;
     flex-shrink: 0;
+}
+
+.playing-card.selected {
+    box-shadow: 0 0 0 2px #dc3545;
 }
 
 .placeholder {
