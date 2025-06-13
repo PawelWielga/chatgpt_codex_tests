@@ -79,7 +79,6 @@
 .deal-card.back {
     background-color: #0055aa;
     color: transparent;
-    position: relative;
 }
 
 .playing-card.back::after,
