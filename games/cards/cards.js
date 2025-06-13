@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     for (const s of suits) {
         for (const r of ranks) {
             const card = document.createElement('div');
-            card.className = 'card back';
+            card.className = 'playing-card back';
             card.textContent = '';
             card.style.left = '50%';
             card.style.top = '50%';
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createCard(text, back = false) {
         const c = document.createElement('div');
-        c.className = 'card';
+        c.className = 'playing-card';
         if (back) c.classList.add('back');
         c.textContent = text;
         return c;
