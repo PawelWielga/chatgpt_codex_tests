@@ -67,10 +67,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    function dealCard(card, target, faceUp, offset) {
+    function dealCard(card, target, faceUp) {
         return new Promise(resolve => {
             const tableRect = deckDiv.parentElement.getBoundingClientRect();
             const deckRect = deckDiv.getBoundingClientRect();
+
+            const startWidth = target.offsetWidth;
+            target.style.width = startWidth + 'px';
+
+            const placeholder = document.createElement('div');
+            placeholder.className = 'playing-card placeholder';
+            if (!faceUp) placeholder.classList.add('back');
+            target.appendChild(placeholder);
+
+            const endWidth = target.scrollWidth;
+            const targetRect = placeholder.getBoundingClientRect();
+
             const temp = document.createElement('div');
             temp.className = 'deal-card';
             if (!faceUp) temp.classList.add('back');
@@ -78,31 +90,31 @@ document.addEventListener('DOMContentLoaded', () => {
             temp.style.left = (deckRect.left - tableRect.left) + 'px';
             temp.style.top = (deckRect.top - tableRect.top) + 'px';
             deckDiv.parentElement.appendChild(temp);
-            const targetX = target.offsetLeft + offset;
-            const targetY = target.offsetTop;
+
             requestAnimationFrame(() => {
-                temp.style.transform = `translate(${targetX - (deckRect.left - tableRect.left)}px, ${targetY - (deckRect.top - tableRect.top)}px)`;
+                target.style.width = endWidth + 'px';
+                temp.style.transform = `translate(${targetRect.left - deckRect.left}px, ${targetRect.top - deckRect.top}px)`;
             });
+
             temp.addEventListener('transitionend', () => {
-                target.appendChild(createCard(faceUp ? card : '', !faceUp));
+                placeholder.textContent = faceUp ? card : '';
+                if (faceUp) placeholder.classList.remove('back');
+                placeholder.style.visibility = '';
                 temp.remove();
+                target.style.width = '';
                 resolve();
             }, { once: true });
         });
     }
 
     async function dealHands(myCards, oppCards, myFaceUp = true, oppFaceUp = false) {
-        let myOffset = 0;
-        let oppOffset = 0;
         const maxLen = Math.max(myCards.length, oppCards.length);
         for (let i = 0; i < maxLen; i++) {
             if (i < myCards.length) {
-                await dealCard(myCards[i], handDiv, myFaceUp, myOffset);
-                myOffset += 70;
+                await dealCard(myCards[i], handDiv, myFaceUp);
             }
             if (i < oppCards.length) {
-                await dealCard(oppCards[i], oppHandDiv, oppFaceUp, oppOffset);
-                oppOffset += 70;
+                await dealCard(oppCards[i], oppHandDiv, oppFaceUp);
             }
         }
     }
