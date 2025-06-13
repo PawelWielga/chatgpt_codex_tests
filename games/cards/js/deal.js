@@ -13,6 +13,17 @@ export function dealCard(deckDiv, card, target, faceUp) {
 
         const endWidth = target.scrollWidth;
 
+        // Calculate the final card position without waiting for the width
+        // transition to finish. Temporarily disable the transition so the
+        // layout reflects the final width and we can measure the correct
+        // bounding box.
+        const originalTransition = target.style.transition;
+        target.style.transition = 'none';
+        target.style.width = endWidth + 'px';
+        const targetRect = placeholder.getBoundingClientRect();
+        target.style.width = startWidth + 'px';
+        target.style.transition = originalTransition;
+
         const temp = document.createElement('div');
         temp.className = 'deal-card';
         if (!faceUp) temp.classList.add('back');
@@ -23,7 +34,6 @@ export function dealCard(deckDiv, card, target, faceUp) {
 
         requestAnimationFrame(() => {
             target.style.width = endWidth + 'px';
-            const targetRect = placeholder.getBoundingClientRect();
             temp.style.transform = `translate(${targetRect.left - deckRect.left}px, ${targetRect.top - deckRect.top}px)`;
         });
 
