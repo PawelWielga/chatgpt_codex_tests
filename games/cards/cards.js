@@ -13,13 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const suits = ['♠','♥','♦','♣'];
     const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 
-    // Show deck stacked in 3D
+    // Show deck stacked in 3D with backs facing up
     let offset = 0;
     for (const s of suits) {
         for (const r of ranks) {
             const card = document.createElement('div');
-            card.className = 'card';
-            card.textContent = `${r}${s}`;
+            card.className = 'card back';
+            card.textContent = '';
             card.style.transform = `translate(-50%, -50%) translateY(${-offset}px)`;
             offset += 2;
             deckDiv.appendChild(card);
