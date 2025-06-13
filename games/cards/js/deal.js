@@ -37,7 +37,10 @@ export function dealCard(deckDiv, card, target, faceUp) {
             temp.style.transform = `translate(${targetRect.left - deckRect.left}px, ${targetRect.top - deckRect.top}px)`;
         });
 
-        temp.addEventListener('transitionend', () => {
+        const timer = setTimeout(() => handler(), 700);
+        temp.addEventListener('transitionend', handler, { once: true });
+        function handler() {
+            clearTimeout(timer);
             placeholder.textContent = faceUp ? card : '';
             if (faceUp) placeholder.classList.remove('back');
             // Ensure the dealt card becomes visible once it reaches the hand
@@ -45,7 +48,7 @@ export function dealCard(deckDiv, card, target, faceUp) {
             temp.remove();
             target.style.width = '';
             resolve();
-        }, { once: true });
+        }
     });
 }
 
