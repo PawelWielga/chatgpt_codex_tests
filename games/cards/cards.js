@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'card back';
             card.textContent = '';
+            card.style.left = '50%';
+            card.style.top = '50%';
             card.style.transform = `translate(-50%, -50%) translateY(${-offset}px)`;
             offset += 2;
             deckDiv.appendChild(card);
