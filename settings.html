@@ -22,6 +22,14 @@
             <label for="settings-emoji" class="form-label">Emoji</label>
             <select id="settings-emoji" class="form-select"></select>
         </div>
+        <div class="mb-3">
+            <label for="settings-ai-color" class="form-label">Kolor komputera w Connect 4</label>
+            <input id="settings-ai-color" type="color" class="form-control form-control-color">
+        </div>
+        <div class="mb-3">
+            <label for="settings-ai-emoji" class="form-label">Emoji komputera w Connect 4</label>
+            <select id="settings-ai-emoji" class="form-select"></select>
+        </div>
         <div class="text-center">
             <button id="settings-save" class="btn btn-primary">Zapisz</button>
             <a href="index.html" class="btn btn-secondary ms-2">Powrót</a>
@@ -33,6 +41,8 @@
         const nameInput = document.getElementById('settings-name');
         const colorInput = document.getElementById('settings-color');
         const emojiSelect = document.getElementById('settings-emoji');
+        const aiColorInput = document.getElementById('settings-ai-color');
+        const aiEmojiSelect = document.getElementById('settings-ai-emoji');
         const saveBtn = document.getElementById('settings-save');
         const emojis = [
             "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁",
@@ -45,14 +55,20 @@
             opt.value = e;
             opt.textContent = e;
             emojiSelect.appendChild(opt);
+            const opt2 = opt.cloneNode(true);
+            aiEmojiSelect.appendChild(opt2);
         });
         nameInput.value = playerSettings.name;
         colorInput.value = playerSettings.color;
         emojiSelect.value = playerSettings.emoji;
+        aiColorInput.value = playerSettings.aiColor;
+        aiEmojiSelect.value = playerSettings.aiEmoji;
         saveBtn.addEventListener('click', () => {
             playerSettings.name = nameInput.value.trim() || 'Gracz';
             playerSettings.color = colorInput.value;
             playerSettings.emoji = emojiSelect.value;
+            playerSettings.aiColor = aiColorInput.value;
+            playerSettings.aiEmoji = aiEmojiSelect.value;
             savePlayerSettings();
             window.location.href = 'index.html';
         });
