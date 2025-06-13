@@ -66,8 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
             players.red.emoji = playerSettings.emoji;
             if (newMode === 'ai') {
                 players.yellow.name = 'Komputer';
-                players.yellow.color = '#ffc107';
-                players.yellow.emoji = '💻';
+                players.yellow.color = playerSettings.aiColor;
+                players.yellow.emoji = playerSettings.aiEmoji;
             } else {
                 players.yellow.name = 'Żółty';
                 players.yellow.color = '#ffc107';
