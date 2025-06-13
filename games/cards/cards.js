@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const suits = ['♠','♥','♦','♣'];
     const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 
-    // Show deck stacked in 3D
-    let offset = 0;
+    // Show deck stacked in 3D with small offsets
+    let depth = 0;
     for (const s of suits) {
         for (const r of ranks) {
             const card = document.createElement('div');
@@ -22,8 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
             card.textContent = '';
             card.style.left = '50%';
             card.style.top = '50%';
-            card.style.transform = `translate(-50%, -50%) translateY(${-offset}px)`;
-            offset += 1;
+            const yShift = -Math.floor(depth / 5) * 2; // slight shift every few cards
+            card.style.transform = `translate(-50%, -50%) translateY(${yShift}px) translateZ(${depth}px)`;
+            depth += 1;
             deckDiv.appendChild(card);
         }
     }
