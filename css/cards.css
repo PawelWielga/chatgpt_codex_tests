@@ -42,7 +42,7 @@
     transform: translateX(-50%) rotate(180deg);
 }
 
-.card {
+.playing-card {
     width: 60px;
     height: 90px;
     background-color: white;
@@ -56,7 +56,7 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.hand .card {
+.hand .playing-card {
     position: static;
 }
 
@@ -75,14 +75,14 @@
     pointer-events: none;
 }
 
-.card.back,
+.playing-card.back,
 .deal-card.back {
     background-color: #0055aa;
     color: transparent;
     position: relative;
 }
 
-.card.back::after,
+.playing-card.back::after,
 .deal-card.back::after {
     content: '🦎';
     position: absolute;
