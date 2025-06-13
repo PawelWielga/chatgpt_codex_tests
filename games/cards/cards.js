@@ -81,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
             target.appendChild(placeholder);
 
             const endWidth = target.scrollWidth;
-            const targetRect = placeholder.getBoundingClientRect();
 
             const temp = document.createElement('div');
             temp.className = 'deal-card';
@@ -93,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             requestAnimationFrame(() => {
                 target.style.width = endWidth + 'px';
+                const targetRect = placeholder.getBoundingClientRect();
                 temp.style.transform = `translate(${targetRect.left - deckRect.left}px, ${targetRect.top - deckRect.top}px)`;
             });
 
