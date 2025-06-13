@@ -67,15 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    function dealAnimation(cards, target = handDiv, faceUp = true) {
-
-        let offset = 0;
-        const tableRect = deckDiv.parentElement.getBoundingClientRect();
-        const deckRect = deckDiv.getBoundingClientRect();
-        cards.forEach(card => {
+    function dealCard(card, target, faceUp, offset) {
+        return new Promise(resolve => {
+            const tableRect = deckDiv.parentElement.getBoundingClientRect();
+            const deckRect = deckDiv.getBoundingClientRect();
             const temp = document.createElement('div');
             temp.className = 'deal-card';
-
             if (!faceUp) temp.classList.add('back');
             temp.textContent = faceUp ? card : '';
             temp.style.left = (deckRect.left - tableRect.left) + 'px';
@@ -83,30 +80,42 @@ document.addEventListener('DOMContentLoaded', () => {
             deckDiv.parentElement.appendChild(temp);
             const targetX = target.offsetLeft + offset;
             const targetY = target.offsetTop;
-
             requestAnimationFrame(() => {
                 temp.style.transform = `translate(${targetX - (deckRect.left - tableRect.left)}px, ${targetY - (deckRect.top - tableRect.top)}px)`;
             });
             temp.addEventListener('transitionend', () => {
-
                 target.appendChild(createCard(faceUp ? card : '', !faceUp));
-
                 temp.remove();
+                resolve();
             }, { once: true });
-            offset += 70;
         });
     }
 
+    async function dealHands(myCards, oppCards, myFaceUp = true, oppFaceUp = false) {
+        let myOffset = 0;
+        let oppOffset = 0;
+        const maxLen = Math.max(myCards.length, oppCards.length);
+        for (let i = 0; i < maxLen; i++) {
+            if (i < myCards.length) {
+                await dealCard(myCards[i], handDiv, myFaceUp, myOffset);
+                myOffset += 70;
+            }
+            if (i < oppCards.length) {
+                await dealCard(oppCards[i], oppHandDiv, oppFaceUp, oppOffset);
+                oppOffset += 70;
+            }
+        }
+    }
+
     function setupDC() {
-        dc.on('data', data => {
+        dc.on('data', async data => {
             const msg = JSON.parse(data);
             if (msg.type === 'start') {
                 opponentName = msg.name;
                 updateNames();
                 myCards = msg.cards;
 
-                dealAnimation(myCards, handDiv, true);
-                dealAnimation(new Array(myCards.length).fill(''), oppHandDiv, false);
+                await dealHands(myCards, new Array(myCards.length).fill(''), true, false);
 
             } else if (msg.type === 'name') {
                 opponentName = msg.name;
@@ -127,8 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const oppCards = deck.splice(0, 4);
         dc.send(JSON.stringify({ type: 'start', name: myName, cards: oppCards }));
 
-        dealAnimation(myCards, handDiv, true);
-        dealAnimation(new Array(oppCards.length).fill(''), oppHandDiv, false);
+        await dealHands(myCards, new Array(oppCards.length).fill(''), true, false);
 
         updateNames();
     }
