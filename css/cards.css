@@ -58,7 +58,7 @@
 }
 
 .hand .playing-card {
-    position: static;
+    position: relative;
     flex-shrink: 0;
 }
 
