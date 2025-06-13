@@ -30,7 +30,8 @@ export function dealCard(deckDiv, card, target, faceUp) {
         temp.addEventListener('transitionend', () => {
             placeholder.textContent = faceUp ? card : '';
             if (faceUp) placeholder.classList.remove('back');
-            placeholder.style.visibility = '';
+            // Ensure the dealt card becomes visible once it reaches the hand
+            placeholder.style.visibility = 'visible';
             temp.remove();
             target.style.width = '';
             resolve();
