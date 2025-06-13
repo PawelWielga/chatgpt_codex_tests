@@ -10,17 +10,34 @@
     perspective: 800px;
     transform: rotateX(15deg);
     box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-
     overflow: visible;
 
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    place-items: center;
 }
 
 #deck {
-    position: absolute;
-    top: 50%;
-    left: 50%;
+    grid-column: 5;
+    grid-row: 1;
+    justify-self: center;
+    align-self: center;
+    position: relative;
     transform-style: preserve-3d;
-    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+}
+
+#discard {
+    grid-column: 5;
+    grid-row: 2;
+    justify-self: center;
+    align-self: center;
+    width: 60px;
+    height: 90px;
+    border: 2px dashed rgba(255,255,255,0.6);
+    border-radius: 4px;
 }
 
 #board {
@@ -49,23 +66,22 @@
 }
 
 .hand {
-    position: absolute;
-
     display: flex;
     gap: 6px;
     transition: width 0.6s ease;
 }
 
 #my-hand {
-    left: 50%;
-    bottom: -100px;
-    transform: translateX(-50%);
+    grid-column: 1 / span 4;
+    grid-row: 2;
+    justify-self: center;
 }
 
 #opp-hand {
-    left: 50%;
-    top: -100px;
-    transform: translateX(-50%) rotate(180deg);
+    grid-column: 1 / span 4;
+    grid-row: 1;
+    justify-self: center;
+    transform: rotate(180deg);
 }
 
 .playing-card {
