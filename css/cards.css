@@ -20,6 +20,8 @@
     right: 20px;
     transform-style: preserve-3d;
     transform: translateY(-50%);
+    width: 60px;
+    height: 90px;
 }
 
 .hand {
@@ -83,6 +85,7 @@
 
 .card.back::after,
 .deal-card.back::after {
+    color: #fff;
     content: '🦎';
     position: absolute;
     left: 0;
