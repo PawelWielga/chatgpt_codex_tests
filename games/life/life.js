@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const terrains = ['water','desert','meadow','forest','mountain'];
     const terrainMoveCost = {
-        water: Infinity,
+        water: moveCost,
         desert: moveCost * 2,
         meadow: moveCost,
         forest: moveCost * 1.5,
@@ -46,17 +46,50 @@ document.addEventListener('DOMContentLoaded', () => {
     generateTerrain();
     renderTerrain();
 
-    const speciesEmojis = ['😺','🐶','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯'];
+    const speciesData = [
+        {emoji:'😺', movement:'land'},
+        {emoji:'🐶', movement:'land'},
+        {emoji:'🐭', movement:'land'},
+        {emoji:'🐹', movement:'land'},
+        {emoji:'🐰', movement:'land'},
+        {emoji:'🦊', movement:'land'},
+        {emoji:'🐻', movement:'land'},
+        {emoji:'🐼', movement:'land'},
+        {emoji:'🐨', movement:'land'},
+        {emoji:'🐯', movement:'land'},
+        {emoji:'🐟', movement:'water'},
+        {emoji:'🐠', movement:'water'},
+        {emoji:'🐡', movement:'water'},
+        {emoji:'🦈', movement:'water'},
+        {emoji:'🐸', movement:'both'},
+        {emoji:'🦆', movement:'both'}
+    ];
     const foodEmojis = ['🍎','🍌','🍇','🍒','🍓','🍑','🍍','🥝'];
+    const waterFoodEmojis = ['🐟','🦐','🦀','🦑'];
 
     const diets = ["herbivore","carnivore","omnivore"];
     const appearanceSelect = document.getElementById("appearance-select");
     const dietSelect = document.getElementById("diet-select");
-    speciesEmojis.forEach(e => {
+    const movementSelect = document.getElementById("movement-select");
+    const movementTypes = ['land','water','both'];
+    const movementLabels = { land: 'Ląd', water: 'Woda', both: 'Ląd i woda' };
+
+    speciesData.forEach(s => {
         const opt = document.createElement("option");
-        opt.value = e;
-        opt.textContent = e;
+        opt.value = s.emoji;
+        opt.textContent = s.emoji;
+        opt.dataset.movement = s.movement;
         appearanceSelect.appendChild(opt);
+    });
+    appearanceSelect.addEventListener('change', () => {
+        const sel = speciesData.find(s => s.emoji === appearanceSelect.value);
+        if (sel) movementSelect.value = sel.movement;
+    });
+    movementTypes.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = movementLabels[t];
+        movementSelect.appendChild(opt);
     });
     const dietLabels = {
         herbivore: 'Roślinożerca',
@@ -147,6 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             terrainGrid.push(row);
         }
+        const cx = Math.floor(size/2);
+        const cy = Math.floor(size/2);
+        for (let y=cy-2; y<=cy+2; y++) {
+            for (let x=cx-2; x<=cx+2; x++) {
+                if (y>=0 && y<size && x>=0 && x<size) {
+                    terrainGrid[y][x] = 'water';
+                }
+            }
+        }
     }
 
     function renderTerrain() {
@@ -160,12 +202,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function randomCell() {
-        let x, y;
+    function randomCellFor(movement) {
+        let x, y, valid;
         do {
             x = Math.floor(Math.random()*size);
             y = Math.floor(Math.random()*size);
-        } while (terrainGrid[y][x] === 'water');
+            const terrain = terrainGrid[y][x];
+            if (movement === 'water') valid = terrain === 'water';
+            else if (movement === 'land') valid = terrain !== 'water';
+            else valid = true;
+        } while (!valid);
         return {x, y};
     }
 
@@ -178,10 +224,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function spawnFood() {
+        const isWater = Math.random() < 0.3;
         const positions = [];
         for (let y=0; y<size; y++) {
             for (let x=0; x<size; x++) {
-                if (terrainGrid[y][x] !== 'water' &&
+                if ((isWater ? terrainGrid[y][x] === 'water' : terrainGrid[y][x] !== 'water') &&
                     !microbes.some(m => m.x===x && m.y===y) &&
                     !foods.some(f => f.x===x && f.y===y)) {
                     positions.push({x,y});
@@ -190,7 +237,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (positions.length === 0) return;
         const pos = positions[Math.floor(Math.random()*positions.length)];
-        const emoji = foodEmojis[Math.floor(Math.random()*foodEmojis.length)];
+        const emoji = isWater ?
+            waterFoodEmojis[Math.floor(Math.random()*waterFoodEmojis.length)] :
+            foodEmojis[Math.floor(Math.random()*foodEmojis.length)];
         const el = createEntity(emoji);
         const food = {x: pos.x, y: pos.y, el};
         foods.push(food);
@@ -219,6 +268,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let best = null;
         let dist = Infinity;
         foods.forEach(f => {
+            const terrain = terrainGrid[f.y][f.x];
+            if (m.movement === 'land' && terrain === 'water') return;
+            if (m.movement === 'water' && terrain !== 'water') return;
             const d = Math.abs(f.x - m.x) + Math.abs(f.y - m.y);
             if (d < dist) { dist = d; best = f; }
         });
@@ -229,6 +281,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const score = m.attack + m.defense;
         for (const o of microbes) {
             if (o === m) continue;
+            const terrain = terrainGrid[o.y][o.x];
+            if (m.movement === 'land' && terrain === 'water') continue;
+            if (m.movement === 'water' && terrain !== 'water') continue;
             const d = Math.abs(o.x - m.x) + Math.abs(o.y - m.y);
             if (d <= 3 && o.attack + o.defense > score) {
                 return o;
@@ -239,6 +294,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function predatorNearby(m) {
         for (const o of microbes) {
             if (o === m) continue;
+            const terrain = terrainGrid[o.y][o.x];
+            if (m.movement === 'land' && terrain === 'water') continue;
+            if (m.movement === 'water' && terrain !== 'water') continue;
             const d = Math.abs(o.x - m.x) + Math.abs(o.y - m.y);
             if (d <= 3) {
                 if ((o.diet === "carnivore" && m.diet !== "carnivore") ||
@@ -257,6 +315,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (o === m) return;
             if ((m.diet === "carnivore" && o.diet !== "carnivore") ||
                 (m.diet === "omnivore" && o.diet === "herbivore")) {
+                const terrain = terrainGrid[o.y][o.x];
+                if (m.movement === 'land' && terrain === 'water') return;
+                if (m.movement === 'water' && terrain !== 'water') return;
                 const d = Math.abs(o.x - m.x) + Math.abs(o.y - m.y);
                 if (d < dist) { dist = d; best = o; }
             }
@@ -268,10 +329,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const nx = m.x + dx;
         const ny = m.y + dy;
         if (nx < 0 || nx >= size || ny < 0 || ny >= size) return;
-        if (terrainGrid[ny][nx] === 'water') return;
+        const terrain = terrainGrid[ny][nx];
+        if (terrain === 'water' && m.movement === 'land') return;
+        if (terrain !== 'water' && m.movement === 'water') return;
         m.x = nx;
         m.y = ny;
-        m.hunger -= terrainMoveCost[terrainGrid[ny][nx]] || moveCost;
+        m.hunger -= terrainMoveCost[terrain] || moveCost;
     }
 
     function moveMicrobe(m) {
@@ -352,12 +415,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         for (let t=0; t<10; t++) {
                             const nx = Math.max(0, Math.min(size-1, m.x + (Math.floor(Math.random()*3)-1)));
                             const ny = Math.max(0, Math.min(size-1, m.y + (Math.floor(Math.random()*3)-1)));
-                            if (terrainGrid[ny][nx] !== 'water' && !microbes.some(o=>o.x===nx && o.y===ny)) {
+                            const terrain = terrainGrid[ny][nx];
+                            const valid = (m.movement === 'land' && terrain !== 'water') ||
+                                          (m.movement === 'water' && terrain === 'water') ||
+                                          (m.movement === 'both');
+                            if (valid && !microbes.some(o=>o.x===nx && o.y===ny)) {
                                 cx = nx; cy = ny; break;
                             }
                         }
                         if (cx === undefined) {
-                            const pos = randomCell();
+                            const pos = randomCellFor(m.movement);
                             cx = pos.x; cy = pos.y;
                         }
                         child.x = cx;
@@ -367,6 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         child.age = 0;
                         child.lifespan = m.lifespan + (Math.random()*20-10);
                         child.isPlayer = false;
+                        child.movement = m.movement;
                         child.el = createEntity(m.emoji);
                         microbes.push(child);
                         drawEntities();
@@ -428,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateTerrain();
         renderTerrain();
 
-        const startPos = randomCell();
+        const startPos = randomCellFor(movementSelect.value);
         player = {
             x: startPos.x,
             y: startPos.y,
@@ -439,6 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
             diet: dietSelect.value,
             hunger: 100,
             emoji: appearanceSelect.value,
+            movement: movementSelect.value,
             el: null,
             age: 0,
             lifespan: baseLifespan + Math.random()*50
@@ -448,7 +517,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (let i=0; i<5; i++) {
             const s = randomStats();
-            const pos = randomCell();
+            const species = speciesData[Math.floor(Math.random()*speciesData.length)];
+            const pos = randomCellFor(species.movement);
             const m = {
                 x: pos.x,
                 y: pos.y,
@@ -458,7 +528,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 isPlayer: false,
                 diet: diets[Math.floor(Math.random()*diets.length)],
                 hunger: 100,
-                emoji: speciesEmojis[Math.floor(Math.random()*speciesEmojis.length)],
+                emoji: species.emoji,
+                movement: species.movement,
                 el: null,
                 age: 0,
                 lifespan: baseLifespan + Math.random()*50
