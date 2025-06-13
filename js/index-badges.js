@@ -14,7 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
       </span>
       <span class="d-inline-flex align-items-center">
         <span class="badge text-bg-warning me-1"><i class="bi bi-people"></i></span>
-        gra dwuosobowa
+        gra wieloosobowa lokalnie
+      </span>
+      <span class="d-inline-flex align-items-center">
+        <span class="badge text-bg-info me-1"><i class="bi bi-wifi"></i></span>
+        gra wieloosobowa zdalnie
       </span>
     `;
     footer.appendChild(info);
