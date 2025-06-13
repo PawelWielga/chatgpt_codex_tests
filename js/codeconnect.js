@@ -42,3 +42,5 @@ const CodeConnect = (() => {
 
     return { host, join };
 })();
+
+window.CodeConnect = CodeConnect;
