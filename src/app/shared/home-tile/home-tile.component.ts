@@ -2,13 +2,13 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-game-card',
-  templateUrl: './game-card.component.html',
-  styleUrls: ['./game-card.component.scss'],
+  selector: 'app-home-tile',
+  templateUrl: './home-tile.component.html',
+  styleUrls: ['./home-tile.component.scss'],
   standalone: true,
   imports: [CommonModule]
 })
-export class GameCardComponent {
+export class HomeTileComponent {
   @Input() link = '';
   @Input() icon = '';
   @Input() title = '';
