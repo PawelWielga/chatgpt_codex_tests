@@ -1,3 +1,7 @@
+declare const playerSettings: any;
+declare function loadPlayerSettings(): void;
+declare const CodeConnect: any;
+
 export function initConnect4() {
     const boardDiv = document.getElementById('connect4-board');
     const wrapperDiv = document.getElementById('connect4-wrapper');
@@ -11,7 +15,7 @@ export function initConnect4() {
     const qrText = document.getElementById('qr-text');
     const namesHeading = document.getElementById('player-names');
     const infoP = document.getElementById('player-info');
-    const modeSelect = document.getElementById('mode-select');
+    const modeSelect = document.getElementById('mode-select') as HTMLSelectElement;
     const rows = 6;
     const cols = 7;
     const styles = getComputedStyle(document.documentElement);
@@ -169,8 +173,8 @@ export function initConnect4() {
 
     function drawOverlay() {
         const ns = 'http://www.w3.org/2000/svg';
-        overlaySvg.setAttribute('width', wrapperDiv.clientWidth);
-        overlaySvg.setAttribute('height', wrapperDiv.clientHeight);
+        overlaySvg.setAttribute('width', String(wrapperDiv.clientWidth));
+        overlaySvg.setAttribute('height', String(wrapperDiv.clientHeight));
         overlaySvg.innerHTML = '';
 
         const defs = document.createElementNS(ns, 'defs');
@@ -185,9 +189,9 @@ export function initConnect4() {
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const circle = document.createElementNS(ns, 'circle');
-                circle.setAttribute('cx', padSize + c * (cellSize + gapSize) + cellSize / 2);
-                circle.setAttribute('cy', padSize + r * (cellSize + gapSize) + cellSize / 2);
-                circle.setAttribute('r', cellSize / 2);
+                circle.setAttribute('cx', String(padSize + c * (cellSize + gapSize) + cellSize / 2));
+                circle.setAttribute('cy', String(padSize + r * (cellSize + gapSize) + cellSize / 2));
+                circle.setAttribute('r', String(cellSize / 2));
                 circle.setAttribute('fill', 'black');
                 mask.appendChild(circle);
             }
@@ -207,9 +211,9 @@ export function initConnect4() {
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const outline = document.createElementNS(ns, 'circle');
-                outline.setAttribute('cx', padSize + c * (cellSize + gapSize) + cellSize / 2);
-                outline.setAttribute('cy', padSize + r * (cellSize + gapSize) + cellSize / 2);
-                outline.setAttribute('r', cellSize / 2);
+                outline.setAttribute('cx', String(padSize + c * (cellSize + gapSize) + cellSize / 2));
+                outline.setAttribute('cy', String(padSize + r * (cellSize + gapSize) + cellSize / 2));
+                outline.setAttribute('r', String(cellSize / 2));
                 outline.setAttribute('fill', 'none');
                 outline.setAttribute('stroke', borderColor);
                 outline.setAttribute('stroke-width', '2');
@@ -225,8 +229,8 @@ export function initConnect4() {
             for (let c = 0; c < cols; c++) {
                 const div = document.createElement('div');
                 div.className = 'cell';
-                div.dataset.row = r;
-                div.dataset.col = c;
+                div.dataset.row = String(r);
+                div.dataset.col = String(c);
                 div.textContent = '';
                 div.addEventListener('click', () => handleMove(c));
                 boardDiv.appendChild(div);
@@ -243,7 +247,7 @@ export function initConnect4() {
         if (mode === 'remote' && !remote && !isMyTurn) return;
         for (let r = rows - 1; r >= 0; r--) {
             if (!board[r][col]) {
-                const cell = boardDiv.querySelector(`[data-row='${r}'][data-col='${col}']`);
+                const cell = boardDiv.querySelector(`[data-row='${r}'][data-col='${col}']`) as HTMLElement;
 
                 animating = true;
                 const disc = document.createElement('div');
