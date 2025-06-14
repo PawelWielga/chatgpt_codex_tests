@@ -1,13 +1,17 @@
+declare const playerSettings: any;
+declare function loadPlayerSettings(): void;
+declare var Peer: any;
+
 export function initHotpotato() {
-    const hostBtn = document.getElementById('hp-host');
-    const joinBtn = document.getElementById('hp-join');
-    const startBtn = document.getElementById('hp-start');
-    const passBtn = document.getElementById('hp-pass');
-    const codeP = document.getElementById('hp-code');
-    const qrDiv = document.getElementById('hp-qr');
-    const namesP = document.getElementById('hp-names');
-    const statusP = document.getElementById('hp-status');
-    const timerP = document.getElementById('hp-timer');
+    const hostBtn = document.getElementById('hp-host') as HTMLButtonElement;
+    const joinBtn = document.getElementById('hp-join') as HTMLButtonElement;
+    const startBtn = document.getElementById('hp-start') as HTMLButtonElement;
+    const passBtn = document.getElementById('hp-pass') as HTMLButtonElement;
+    const codeP = document.getElementById('hp-code') as HTMLElement;
+    const qrDiv = document.getElementById('hp-qr') as HTMLElement;
+    const namesP = document.getElementById('hp-names') as HTMLElement;
+    const statusP = document.getElementById('hp-status') as HTMLElement;
+    const timerP = document.getElementById('hp-timer') as HTMLElement;
 
     loadPlayerSettings();
 
@@ -15,8 +19,8 @@ export function initHotpotato() {
     let isHost = false;
     let myId = null;
     let myName = playerSettings.name;
-    const connections = {}; // peerId -> DataConnection
-    const players = {}; // peerId -> {name}
+    const connections: Record<string, any> = {}; // peerId -> DataConnection
+    const players: Record<string, any> = {}; // peerId -> {name}
     let holderId = null;
     let timeLeft = 0;
     let tickInterval = null;
@@ -52,10 +56,10 @@ export function initHotpotato() {
     function startTimer() {
         clearInterval(tickInterval);
         timeLeft = 8;
-        timerP.textContent = timeLeft;
+        timerP.textContent = String(timeLeft);
         tickInterval = setInterval(() => {
             timeLeft--;
-            timerP.textContent = timeLeft;
+            timerP.textContent = String(timeLeft);
             broadcast({type:'tick', time: timeLeft});
             if (timeLeft <= 0) {
                 clearInterval(tickInterval);
@@ -175,15 +179,15 @@ export function initHotpotato() {
             holderId = msg.holder;
             timeLeft = msg.time;
             updateUI();
-            if (holderId) timerP.textContent = timeLeft;
+            if (holderId) timerP.textContent = String(timeLeft);
         } else if (msg.type === 'holder') {
             holderId = msg.holder;
             timeLeft = 8;
-            timerP.textContent = timeLeft;
+            timerP.textContent = String(timeLeft);
             updateUI();
         } else if (msg.type === 'tick') {
             timeLeft = msg.time;
-            timerP.textContent = timeLeft;
+            timerP.textContent = String(timeLeft);
         } else if (msg.type === 'end') {
             statusP.textContent = players[msg.loser].name + ' przegrywa!';
             holderId = null;

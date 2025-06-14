@@ -1,7 +1,7 @@
 export function initTetris() {
     const board = document.getElementById('tetris-board');
     const startBtn = document.getElementById('tetris-start');
-    const scoreSpan = document.getElementById('tetris-score');
+    const scoreSpan = document.getElementById('tetris-score') as HTMLElement;
     const btnRotate = document.getElementById('tetris-rotate');
     const btnLeft = document.getElementById('tetris-left');
     const btnRight = document.getElementById('tetris-right');
@@ -56,7 +56,7 @@ export function initTetris() {
                 }
             });
         }
-        scoreSpan.textContent = score;
+        scoreSpan.textContent = String(score);
     }
 
     function canMove(dx, dy, blocks = null) {

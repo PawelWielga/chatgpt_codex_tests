@@ -1,7 +1,7 @@
 export function initSnake() {
     const board = document.getElementById('snake-board');
     const startBtn = document.getElementById('snake-start');
-    const scoreSpan = document.getElementById('snake-score');
+    const scoreSpan = document.getElementById('snake-score') as HTMLElement;
     const btnUp = document.getElementById('snake-up');
     const btnDown = document.getElementById('snake-down');
     const btnLeft = document.getElementById('snake-left');
@@ -39,7 +39,7 @@ export function initSnake() {
             cells[seg.y][seg.x].classList.add('snake');
         });
         cells[food.y][food.x].classList.add('food');
-        scoreSpan.textContent = score;
+        scoreSpan.textContent = String(score);
     }
 
     function placeFood() {

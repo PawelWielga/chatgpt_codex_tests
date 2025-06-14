@@ -1,5 +1,5 @@
 export function initPong() {
-    const canvas = document.getElementById('pong-canvas');
+    const canvas = document.getElementById('pong-canvas') as HTMLCanvasElement;
     const ctx = canvas.getContext('2d');
     const startBtn = document.getElementById('pong-start');
     const scoreEl = document.getElementById('pong-score');

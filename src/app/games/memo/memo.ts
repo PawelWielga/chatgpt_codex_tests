@@ -53,7 +53,8 @@ export function initMemo() {
                 firstCard.disabled = true;
                 firstCard = null;
                 lock = false;
-                if ([...board.querySelectorAll('.memo-card')].every(b => b.dataset.matched === 'true')) {
+                const cards = board.querySelectorAll('.memo-card') as NodeListOf<HTMLButtonElement>;
+                if ([...cards].every(b => b.dataset.matched === 'true')) {
                     setTimeout(() => {
                         status.textContent = `Wygrana w ${moves} ruchach!`;
                     }, 300);

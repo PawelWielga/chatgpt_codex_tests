@@ -1,15 +1,19 @@
 // Rock Paper Scissors with optional online multiplayer using CodeConnect
 
-document.addEventListener('DOMContentLoaded', () => {
-    const buttons = document.querySelectorAll('#rps-choices button');
-    const status = document.getElementById('rps-status');
-    const slot = document.getElementById('rps-slot');
-    const resetBtn = document.getElementById('rps-reset');
-    const hostBtn = document.getElementById('rps-host');
-    const joinBtn = document.getElementById('rps-join');
-    const qrContainer = document.getElementById('rps-qr-container');
-    const qrText = document.getElementById('rps-qr-text');
-    const namesHeading = document.getElementById('rps-names');
+declare const playerSettings: any;
+declare function loadPlayerSettings(): void;
+declare const CodeConnect: any;
+
+export function initRps() {
+    const buttons = document.querySelectorAll('#rps-choices button') as NodeListOf<HTMLButtonElement>;
+    const status = document.getElementById('rps-status') as HTMLElement;
+    const slot = document.getElementById('rps-slot') as HTMLElement;
+    const resetBtn = document.getElementById('rps-reset') as HTMLButtonElement;
+    const hostBtn = document.getElementById('rps-host') as HTMLButtonElement;
+    const joinBtn = document.getElementById('rps-join') as HTMLButtonElement;
+    const qrContainer = document.getElementById('rps-qr-container') as HTMLElement;
+    const qrText = document.getElementById('rps-qr-text') as HTMLElement;
+    const namesHeading = document.getElementById('rps-names') as HTMLElement;
     const score1Span = document.getElementById('rps-score1');
     const score2Span = document.getElementById('rps-score2');
 
@@ -54,8 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
             oppScore++;
             status.textContent = `Przegrana! ${display(theirs)} bije ${display(mine)}`;
         }
-        score1Span.textContent = myScore;
-        score2Span.textContent = oppScore;
+        score1Span.textContent = String(myScore);
+        score2Span.textContent = String(oppScore);
     }
 
     function resetRound() {

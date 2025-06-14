@@ -2,7 +2,7 @@ export function initTictactoe() {
     const board = document.getElementById('board');
     const resetBtn = document.getElementById('reset');
     const status = document.getElementById('ttt-status');
-    const modeSelect = document.getElementById('ttt-mode-select');
+    const modeSelect = document.getElementById('ttt-mode-select') as HTMLSelectElement;
     const onlineDiv = document.getElementById('ttt-online');
     const hostBtn = document.getElementById('ttt-host');
     const joinBtn = document.getElementById('ttt-join');
