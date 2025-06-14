@@ -1,9 +1,4 @@
-<nav class="navbar navbar-light bg-light">
-  <div class="container-fluid">
-    <span class="navbar-brand mb-0 h1">Gry Przeglądarkowe</span>
-    <a href="settings.html" class="btn btn-link"><i class="bi bi-gear-fill"></i></a>
-  </div>
-</nav>
+<app-navbar></app-navbar>
 <div class="container py-5">
   <h1 class="text-center mb-4">Wybierz grę</h1>
   <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
@@ -37,24 +32,4 @@
     </div>
   </div>
 </div>
-<footer class="text-center py-3">
-  © {{ currentYear }} programmed by DIHOR
-  <div class="small mt-2 d-flex flex-column align-items-center gap-2 badge-legend">
-    <span class="d-inline-flex align-items-center">
-      <span class="badge text-bg-primary me-1"><i class="bi bi-cpu"></i></span>
-      gra przeciw komputerowi
-    </span>
-    <span class="d-inline-flex align-items-center">
-      <span class="badge text-bg-success me-1"><i class="bi bi-person"></i></span>
-      gra jednoosobowa
-    </span>
-    <span class="d-inline-flex align-items-center">
-      <span class="badge text-bg-warning me-1"><i class="bi bi-people"></i></span>
-      gra wieloosobowa lokalnie
-    </span>
-    <span class="d-inline-flex align-items-center">
-      <span class="badge text-bg-info me-1"><i class="bi bi-wifi"></i></span>
-      gra wieloosobowa zdalnie
-    </span>
-  </div>
-</footer>
+<app-footer></app-footer>
