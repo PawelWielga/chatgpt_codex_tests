@@ -1,3 +1,5 @@
+import { AfterViewInit } from '@angular/core';
+import { initCards } from './js/main';
 import { Component } from '@angular/core';
 
 @Component({
@@ -5,4 +7,8 @@ import { Component } from '@angular/core';
   templateUrl: './cards.component.html',
   styleUrls: ['./cards.component.scss']
 })
-export class CardsComponent {}
+export class CardsComponent implements AfterViewInit {
+  ngAfterViewInit(): void {
+    initCards();
+  }
+}
