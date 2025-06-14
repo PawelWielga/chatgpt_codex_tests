@@ -29,3 +29,17 @@ Bootstrap and Bootstrap Icons (loaded from a CDN) supply the basic layout and ic
 Most of the games are meant for local play but **Connect 4**, **Rock Paper Scissors** and **Gorący Ziemniak** also allow remote matches using the connection helpers described above. No external server is required – the games communicate directly between browsers.
 
 The repository is entirely static so it can be hosted on GitHub Pages or any basic web server without a build step. Feel free to browse the source code for each mini-game to see straightforward implementations of classic browser games.
+
+## Angular migration status
+
+As of now the project remains a static HTML/JS collection and has not been converted to Angular. Below is a list of tasks required to migrate properly.
+
+### Tasks to convert to Angular
+- Initialize an Angular workspace using the Angular CLI and set up a root module.
+- Create a component for each game currently under `games/` and move their HTML, CSS and JS logic into Angular components and services.
+- Set up routing so that each game is accessible via its own path.
+- Migrate shared utilities such as `player-settings.js` and `codeconnect.js` into Angular services.
+- Update build configuration to include assets in `css/` and `js/` folders.
+- Replace CDN loaded dependencies with package-based installations where possible.
+
+
