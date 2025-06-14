@@ -16,173 +16,23 @@
   </ul>
   <div class="tab-content">
     <div class="tab-pane fade show active" id="games" role="tabpanel" aria-labelledby="games-tab">
-      <div class="row row-cols-2 row-cols-md-3 g-4">
-        <div class="col">
-          <a href="games/tictactoe/tictactoe.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-grid-3x3-gap" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Kółko i Krzyżyk</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-primary"><i class="bi bi-cpu me-1"></i></span>
-                  <span class="badge text-bg-warning"><i class="bi bi-people me-1"></i></span>
-                  <span class="badge text-bg-info"><i class="bi bi-wifi me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
+        <div class="row row-cols-2 row-cols-md-3 g-4">
+          <app-game-card link="games/tictactoe/tictactoe.html" icon="bi-grid-3x3-gap" title="Kółko i Krzyżyk" [badges]="['cpu', 'people', 'wifi']"></app-game-card>
+          <app-game-card link="games/memo/memo.html" icon="bi-layers" title="Memo - gra w pary" [badges]="['person']"></app-game-card>
+          <app-game-card link="games/life/life.html" icon="bi-bug" title="Gra w życie" [badges]="['person']"></app-game-card>
+          <app-game-card link="games/snake/snake.html" icon="bi-arrows-move" title="Wąż" [badges]="['person']"></app-game-card>
+          <app-game-card link="games/rps/rps.html" icon="bi-hand-index" title="Kamień, Papier, Nożyce" [badges]="['cpu', 'wifi']"></app-game-card>
+          <app-game-card link="games/minesweeper/minesweeper.html" icon="bi-flag" title="Saper" [badges]="['person']"></app-game-card>
+          <app-game-card link="games/tetris/tetris.html" icon="bi-stack" title="Tetris" [badges]="['person']"></app-game-card>
+          <app-game-card link="games/connect4/connect4.html" icon="bi-circle-half" title="Connect 4" [badges]="['cpu', 'people', 'wifi']"></app-game-card>
+          <app-game-card link="games/pong/pong.html" icon="bi-record-fill" title="Pong" [badges]="['people']"></app-game-card>
+          <app-game-card link="games/hotpotato/hotpotato.html" icon="bi-fire" title="Gorący Ziemniak" [badges]="['wifi']"></app-game-card>
+          <app-game-card link="games/cards/cards.html" icon="bi-cards" title="Ewolucja" [badges]="['person', 'wifi']"></app-game-card>
         </div>
-        <div class="col">
-          <a href="games/memo/memo.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-layers" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Memo - gra w pary</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-success"><i class="bi bi-person me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="games/life/life.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-bug" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Gra w życie</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-success"><i class="bi bi-person me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="games/snake/snake.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-arrows-move" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Wąż</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-success"><i class="bi bi-person me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="games/rps/rps.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-hand-index" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Kamień, Papier, Nożyce</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-primary"><i class="bi bi-cpu me-1"></i></span>
-                  <span class="badge text-bg-info"><i class="bi bi-wifi me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="games/minesweeper/minesweeper.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-flag" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Saper</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-success"><i class="bi bi-person me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="games/tetris/tetris.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-stack" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Tetris</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-success"><i class="bi bi-person me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="games/connect4/connect4.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-circle-half" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Connect 4</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-primary"><i class="bi bi-cpu me-1"></i></span>
-                  <span class="badge text-bg-warning"><i class="bi bi-people me-1"></i></span>
-                  <span class="badge text-bg-info"><i class="bi bi-wifi me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="games/pong/pong.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-record-fill" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Pong</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-warning"><i class="bi bi-people me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="games/hotpotato/hotpotato.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-fire" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Gorący Ziemniak</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-info"><i class="bi bi-wifi me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="col">
-          <a href="games/cards/cards.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-cards" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Ewolucja</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-success"><i class="bi bi-person me-1"></i></span>
-                  <span class="badge text-bg-info"><i class="bi bi-wifi me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
-      </div>
     </div>
     <div class="tab-pane fade" id="others" role="tabpanel" aria-labelledby="others-tab">
       <div class="row row-cols-2 row-cols-md-3 g-4">
-        <div class="col">
-          <a href="other/calc/calc.html" class="text-decoration-none">
-            <div class="card text-center h-100">
-              <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                <i class="bi bi-calculator" style="font-size: 3rem;"></i>
-                <p class="mt-3 mb-0">Catculator</p>
-                <div class="d-flex gap-2 mt-2">
-                  <span class="badge text-bg-success"><i class="bi bi-person me-1"></i></span>
-                </div>
-              </div>
-            </div>
-          </a>
-        </div>
+        <app-game-card link="other/calc/calc.html" icon="bi-calculator" title="Catculator" [badges]="['person']"></app-game-card>
       </div>
     </div>
   </div>
