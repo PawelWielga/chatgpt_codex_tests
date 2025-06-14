@@ -1,3 +1,5 @@
+import { AfterViewInit } from '@angular/core';
+import { initHotpotato } from './hotpotato';
 import { Component } from '@angular/core';
 
 @Component({
@@ -5,4 +7,8 @@ import { Component } from '@angular/core';
   templateUrl: './hotpotato.component.html',
   styleUrls: ['./hotpotato.component.scss']
 })
-export class HotpotatoComponent {}
+export class HotpotatoComponent implements AfterViewInit {
+  ngAfterViewInit(): void {
+    initHotpotato();
+  }
+}

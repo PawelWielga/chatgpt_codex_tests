@@ -1,3 +1,5 @@
+import { AfterViewInit } from '@angular/core';
+import { initMemo } from './memo';
 import { Component } from '@angular/core';
 
 @Component({
@@ -5,4 +7,8 @@ import { Component } from '@angular/core';
   templateUrl: './memo.component.html',
   styleUrls: ['./memo.component.scss']
 })
-export class MemoComponent {}
+export class MemoComponent implements AfterViewInit {
+  ngAfterViewInit(): void {
+    initMemo();
+  }
+}

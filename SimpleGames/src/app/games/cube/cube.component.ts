@@ -1,3 +1,5 @@
+import { AfterViewInit } from '@angular/core';
+import { initCube } from './cube';
 import { Component } from '@angular/core';
 
 @Component({
@@ -5,4 +7,8 @@ import { Component } from '@angular/core';
   templateUrl: './cube.component.html',
   styleUrls: ['./cube.component.scss']
 })
-export class CubeComponent {}
+export class CubeComponent implements AfterViewInit {
+  ngAfterViewInit(): void {
+    initCube();
+  }
+}

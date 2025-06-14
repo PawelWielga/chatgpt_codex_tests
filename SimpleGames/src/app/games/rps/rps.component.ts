@@ -1,3 +1,5 @@
+import { AfterViewInit } from '@angular/core';
+import { initRps } from './rps';
 import { Component } from '@angular/core';
 
 @Component({
@@ -5,4 +7,8 @@ import { Component } from '@angular/core';
   templateUrl: './rps.component.html',
   styleUrls: ['./rps.component.scss']
 })
-export class RpsComponent {}
+export class RpsComponent implements AfterViewInit {
+  ngAfterViewInit(): void {
+    initRps();
+  }
+}

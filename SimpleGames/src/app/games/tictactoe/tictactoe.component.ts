@@ -1,3 +1,5 @@
+import { AfterViewInit } from '@angular/core';
+import { initTictactoe } from './tictactoe';
 import { Component } from '@angular/core';
 
 @Component({
@@ -5,4 +7,8 @@ import { Component } from '@angular/core';
   templateUrl: './tictactoe.component.html',
   styleUrls: ['./tictactoe.component.scss']
 })
-export class TictactoeComponent {}
+export class TictactoeComponent implements AfterViewInit {
+  ngAfterViewInit(): void {
+    initTictactoe();
+  }
+}
