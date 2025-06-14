@@ -1,5 +1,5 @@
 export function dealCard(deckDiv, card, target, faceUp) {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
         const tableRect = deckDiv.parentElement.getBoundingClientRect();
         const deckRect = deckDiv.getBoundingClientRect();
 

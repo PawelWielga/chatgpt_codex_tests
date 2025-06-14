@@ -1,6 +1,9 @@
 // Advanced organism simulation
 
-document.addEventListener('DOMContentLoaded', () => {
+declare const playerSettings: any;
+declare function loadPlayerSettings(): void;
+
+export function initLife() {
     const board = document.getElementById('life-board');
     const startBtn = document.getElementById('life-start');
     const hungerBar = document.getElementById('hunger-bar');
@@ -68,9 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const waterFoodEmojis = ['🐟','🦐','🦀','🦑'];
 
     const diets = ["herbivore","carnivore","omnivore"];
-    const appearanceSelect = document.getElementById("appearance-select");
-    const dietSelect = document.getElementById("diet-select");
-    const movementSelect = document.getElementById("movement-select");
+    const appearanceSelect = document.getElementById("appearance-select") as HTMLSelectElement;
+    const dietSelect = document.getElementById("diet-select") as HTMLSelectElement;
+    const movementSelect = document.getElementById("movement-select") as HTMLSelectElement;
     const movementTypes = ['land','water','both'];
     const movementLabels = { land: 'Ląd', water: 'Woda', both: 'Ląd i woda' };
 
@@ -116,10 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = ['attack','defense','speed']
             .map(k => Number(stats[k]) || 0)
             .reduce((a,b) => a + b, 0);
-        remainingSpan.textContent = totalPoints - total;
+        remainingSpan.textContent = String(totalPoints - total);
     }
 
-    document.querySelectorAll('.stat-inc').forEach(btn => {
+    (document.querySelectorAll('.stat-inc') as NodeListOf<HTMLButtonElement>).forEach(btn => {
         btn.addEventListener('click', () => {
             const stat = btn.dataset.stat;
             const total = stats.attack + stats.defense + stats.speed;
@@ -130,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.querySelectorAll('.stat-dec').forEach(btn => {
+    (document.querySelectorAll('.stat-dec') as NodeListOf<HTMLButtonElement>).forEach(btn => {
         btn.addEventListener('click', () => {
             const stat = btn.dataset.stat;
             if (stats[stat] > 0) {

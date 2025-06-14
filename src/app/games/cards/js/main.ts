@@ -1,6 +1,9 @@
-import { createDeck, suits, ranks } from './deck.js';
-import { dealHands } from './deal.js';
-import { registerHandlers, hostGame, joinGame } from './network.js';
+import { createDeck, suits, ranks } from './deck';
+import { dealHands } from './deal';
+import { registerHandlers, hostGame, joinGame } from './network';
+
+declare const playerSettings: any;
+declare function loadPlayerSettings(): void;
 
 export function initCards() {
     const deckDiv = document.getElementById('deck');

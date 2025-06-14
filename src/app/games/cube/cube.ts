@@ -1,8 +1,7 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/controls/OrbitControls.js';
+declare const THREE: any;
+declare const OrbitControls: any;
 
-// Execute once the script is loaded at the end of the document
-(function () {
+export function initCube() {
     const container = document.getElementById('cube-container');
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
@@ -47,4 +46,4 @@ import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/exampl
 
     onWindowResize();
     animate();
-})();
+}
