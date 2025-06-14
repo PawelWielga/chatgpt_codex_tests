@@ -1,7 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/angular-cli",
   "version": 1,
-  "defaultProject": "browser-games-angular",
   "projects": {
     "browser-games-angular": {
       "projectType": "application",
@@ -29,7 +28,7 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "browser-games-angular:build"
+            "buildTarget": "browser-games-angular:build"
           }
         }
       }
