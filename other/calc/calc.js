@@ -24,13 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { value: '=', classes: ['span-2'] }
     ];
 
-    const svgPath = 'M10 55 Q10 35 30 30 L40 10 L50 30 L60 10 L70 30 Q90 35 90 55 Q90 80 50 90 Q10 80 10 55 Z';
-
     buttons.forEach(({ value, classes }) => {
         const btn = document.createElement('button');
-        btn.innerHTML =
-            `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="${svgPath}"/></svg>`+
-            `<span>${value}</span>`;
+        btn.innerHTML = `<span class="cat-face"><span>${value}</span></span>`;
         btn.dataset.value = value;
         btn.classList.add('cat-button');
         if (classes) btn.classList.add(...classes);
