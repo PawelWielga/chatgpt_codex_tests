@@ -22,6 +22,10 @@ body {
     gap: 10px;
 }
 
+.span-2 {
+    grid-column: span 2;
+}
+
 .cat-button {
     position: relative;
     width: 70px;
