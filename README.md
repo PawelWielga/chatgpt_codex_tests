@@ -19,7 +19,7 @@ Bootstrap and Bootstrap Icons (loaded from a CDN) supply the basic layout and ic
 * **Wąż** – traditional Snake. Collect food to grow longer without hitting walls or yourself.
 * **Kamień, Papier, Nożyce** – simple duel against the computer. Choose your symbol and see who wins.
 * **Saper** – classic Minesweeper. Uncover all safe fields without detonating a mine.
-* **Catculator** – basic calculator with pink and purple theme. The digit buttons are styled as cute cat heads.
+* **Catculator** – basic calculator with pink and purple theme. The digit buttons are styled as cute cat heads and now include AC and DEL controls along with a history display.
 * **Tetris** – classic falling-block puzzle with on‑screen arrow controls.
 * **Connect 4** – drop discs to line up four in a row. You can play locally against another person, challenge the computer or set up an online match via PeerJS using short 5-character codes – no local server needed.
 * **Pong** – classic paddle and ball game for two players.
