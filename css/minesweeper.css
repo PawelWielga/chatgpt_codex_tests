@@ -3,8 +3,6 @@
     grid-template-columns: repeat(8, 30px);
     grid-template-rows: repeat(8, 30px);
     gap: 2px;
-    margin: 0 auto;
-    width: max-content;
 }
 
 #mine-board button {
