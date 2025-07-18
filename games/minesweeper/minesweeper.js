@@ -2,11 +2,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const boardEl = document.getElementById('mine-board');
     const resetBtn = document.getElementById('mine-reset');
     const statusEl = document.getElementById('mine-status');
-    const size = 8;
-    const mines = 10;
+    const difficultySelect = document.getElementById('mine-difficulty');
+    const DIFFICULTIES = {
+        easy: { size: 8, mines: 10 },
+        medium: { size: 12, mines: 25 },
+        hard: { size: 16, mines: 40 }
+    };
+    let size = 8;
+    let mines = 10;
     let board = [];
 
     function init() {
+        const diff = DIFFICULTIES[difficultySelect.value] || DIFFICULTIES.medium;
+        size = diff.size;
+        mines = diff.mines;
+        boardEl.style.setProperty('--size', size);
         boardEl.innerHTML = '';
         board = [];
         statusEl.textContent = '';
@@ -161,5 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     resetBtn.addEventListener('click', init);
+    difficultySelect.addEventListener('change', init);
     init();
 });

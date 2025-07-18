@@ -13,6 +13,13 @@
     <div class="container py-5 position-relative">
         <button type="button" class="btn btn-link help-button" data-bs-toggle="modal" data-bs-target="#helpModal"><i class="bi bi-question-circle"></i></button>
         <h1 class="text-center mb-4">Saper (Minesweeper)</h1>
+        <div class="text-center mb-3">
+            <select id="mine-difficulty" class="form-select d-inline-block w-auto">
+                <option value="easy">Łatwy</option>
+                <option value="medium" selected>Średni</option>
+                <option value="hard">Trudny</option>
+            </select>
+        </div>
         <div id="mine-board" class="mb-3 mx-auto"></div>
         <p id="mine-status" class="text-center"></p>
         <div class="text-center mt-3">
