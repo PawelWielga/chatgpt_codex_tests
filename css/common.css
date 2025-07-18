@@ -38,3 +38,26 @@ body > footer {
     right: 0;
     margin: 0.5rem;
 }
+
+/* Center common game boards horizontally */
+#board,
+#memo-board,
+#mine-board,
+#snake-board,
+#tetris-board,
+#life-board,
+#pong-canvas,
+#connect4-wrapper,
+#table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Boards using automatic width */
+#board,
+#memo-board,
+#mine-board,
+#snake-board,
+#tetris-board {
+    width: max-content;
+}

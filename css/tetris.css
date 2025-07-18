@@ -3,8 +3,6 @@
     grid-template-columns: repeat(10, 30px);
     grid-template-rows: repeat(20, 30px);
     gap: 1px;
-    margin: 0 auto;
-    width: max-content;
 }
 
 #tetris-board div {
