@@ -1,0 +1,110 @@
+/* Design tokens and base styles (non-disruptive) */
+:root {
+  /* Color tokens */
+  --color-bg: #ffffff;
+  --color-fg: #111111;
+  --color-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-accent: #2563eb;
+
+  /* Dark theme counterparts */
+  --color-bg-dark: #0f172a;
+  --color-fg-dark: #e5e7eb;
+  --color-muted-dark: #94a3b8;
+  --color-border-dark: #1f2937;
+  --color-accent-dark: #60a5fa;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Radius */
+  --radius-1: 6px;
+  --radius-2: 8px;
+  --radius-3: 12px;
+
+  /* Shadows */
+  --shadow-1: 0 2px 8px rgba(0,0,0,0.10);
+  --shadow-2: 0 12px 28px rgba(0,0,0,0.22);
+  --shadow-3: 0 14px 30px rgba(0,0,0,0.55), 0 2px 10px rgba(0,0,0,0.25);
+
+  /* Z-index layers */
+  --z-desktop: 0;
+  --z-windows: 1500;
+  --z-overlay: 3000;
+
+  /* Window tokens (mapped from existing styles) */
+  --window-bg-dark: #0f141b;
+  --window-fg-dark: #e7eaf0;
+  --window-bg-light: #f2f4f8;
+  --window-fg-light: #1f2430;
+}
+
+/* Theme mapping via data-theme (already controlled in SettingsProvider) */
+:root[data-theme="dark"], html[data-theme="dark"] {
+  --color-bg: var(--color-bg-dark);
+  --color-fg: var(--color-fg-dark);
+  --color-muted: var(--color-muted-dark);
+  --color-border: var(--color-border-dark);
+  --color-accent: var(--color-accent-dark);
+}
+
+/* Base document normalization (non-opinionated) */
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+  line-height: 1.4;
+}
+
+/* Top-right red construction banner */
+.construction-banner {
+  position: fixed;
+  top: 16px;
+  right: -48px; /* offset due to rotation so it hugs the corner */
+  z-index: 9999;
+  transform: rotate(45deg);
+  transform-origin: right top;
+  background: linear-gradient(90deg, #b91c1c, #ef4444);
+  color: #fff;
+  padding: 10px 80px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  pointer-events: none; /* do not block clicks below */
+  font-size: 12px;
+}
+
+@media (max-width: 520px) {
+  .construction-banner {
+    top: 12px;
+    right: -56px;
+    padding: 8px 72px;
+    font-size: 11px;
+  }
+}
+
+/* Focus ring for keyboard users */
+:where(button, [role="button"], a, [tabindex]) :focus-visible,
+:where(button, [role="button"], a, [tabindex]):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, #ffffff 30%);
+  outline-offset: 2px;
+  border-radius: var(--radius-1);
+}
+
+/* Reduce motion respect */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

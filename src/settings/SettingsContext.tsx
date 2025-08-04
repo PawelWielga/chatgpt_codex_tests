@@ -1,48 +1,31 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { Settings } from "./settings.types";
+import { defaultSettings } from "./settings.types";
+import { loadSettings, saveSettings } from "./settings.storage";
 
-type Difficulty = "easy" | "normal" | "hard";
-type Theme = "light" | "dark";
-
-export type Settings = {
-  difficulty: Difficulty;
-  sound: boolean;
-  theme: Theme;
-};
-
+/** Public API for settings context */
 type SettingsContextValue = {
   settings: Settings;
-  setDifficulty: (d: Difficulty) => void;
+  setDifficulty: (d: Settings["difficulty"]) => void;
   toggleSound: () => void;
-  setTheme: (t: Theme) => void;
+  setTheme: (t: Settings["theme"]) => void;
   reset: () => void;
 };
 
-const defaultSettings: Settings = {
-  difficulty: "normal",
-  sound: true,
-  theme: "light",
-};
-
-const SETTINGS_KEY = "app:settings:v1";
-
+/** Internal React Context for app settings */
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined);
 
-export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<Settings>(() => {
-    try {
-      const raw = localStorage.getItem(SETTINGS_KEY);
-      return raw ? { ...defaultSettings, ...JSON.parse(raw) } : defaultSettings;
-    } catch {
-      return defaultSettings;
-    }
-  });
+/** Provider that loads, persists, and exposes app settings */
+export function SettingsProvider({ children }: { children: React.ReactNode }): React.ReactElement {
+  const [settings, setSettings] = useState<Settings>(() => loadSettings());
 
+  // Persist settings and reflect theme on document element
   useEffect(() => {
+    saveSettings(settings);
     try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
       document.documentElement.dataset.theme = settings.theme;
     } catch {
-      // ignore persistence errors
+      // Ignore DOM write issues (e.g., SSR or restricted environments)
     }
   }, [settings]);
 
@@ -60,7 +43,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   return <SettingsContext.Provider value={api}>{children}</SettingsContext.Provider>;
 }
 
-export function useSettings() {
+/** Hook to access settings safely within provider */
+export function useSettings(): SettingsContextValue {
   const ctx = useContext(SettingsContext);
   if (!ctx) throw new Error("useSettings must be used within SettingsProvider");
   return ctx;

@@ -38,7 +38,10 @@ jobs:
       - name: Build
         env:
           VITE_BASE_PATH: ${{ env.VITE_BASE_PATH }}
-        run: npm run build
+        run: |
+          npm run build
+          # Add GitHub Pages SPA fallback (serve index.html for client routes)
+          cp dist/index.html dist/404.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

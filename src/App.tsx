@@ -1,14 +1,16 @@
 ﻿import React, { useEffect } from "react";
 import { SettingsProvider } from "@/settings/SettingsContext";
 import Desktop from "@/desktop/Desktop";
-import { WindowManager, useWindowManager } from "@/window/WindowManager";
-import FullscreenPrompt from "@/components/FullscreenPrompt";
-import { isFullscreen, onFullscreenChange } from "@/utils/fullscreen";
+import { WindowManager } from "@/window/WindowManager";
 
-function useClock() {
+/**
+ * Hook: Updates the #clock element textContent every second.
+ * Side-effect is isolated and cleaned up on unmount.
+ */
+function useClock(): void {
   useEffect(() => {
     const el = document.getElementById("clock");
-    const tick = () => {
+    const updateClock = () => {
       const now = new Date();
       const time = now.toLocaleTimeString("pl-PL", {
         hour: "2-digit",
@@ -17,21 +19,19 @@ function useClock() {
       });
       if (el) el.textContent = time;
     };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
+    updateClock();
+    const id = window.setInterval(updateClock, 1000);
+    return () => window.clearInterval(id);
   }, []);
 }
 
-/* FullscreenPromptOpener temporarily disabled */
-
-export default function App() {
+export default function App(): React.ReactElement {
   useClock();
   return (
     <SettingsProvider>
       <WindowManager>
-        {/* Fullscreen prompt disabled for now */}
-        {/* <FullscreenPromptOpener /> */}
+        {/* Top-right construction banner (does not intercept pointer events) */}
+        <div className="construction-banner">Page is under construction</div>
         <Desktop />
       </WindowManager>
     </SettingsProvider>

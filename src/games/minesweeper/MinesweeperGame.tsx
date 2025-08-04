@@ -10,7 +10,12 @@ type Cell = {
 
 type Difficulty = { cols: number; rows: number; mines: number };
 
-const DIFF: Difficulty = { cols: 9, rows: 9, mines: 10 };
+/** Constants */
+const DEFAULT_DIFFICULTY: Difficulty = { cols: 9, rows: 9, mines: 10 };
+const TIMER_INTERVAL_MS = 1000;
+const MAX_TIMER = 999;
+const CELL_PX = 28;
+const RIPPLE_STEP_MS = 60;
 
 // Meta used only for the latest reveal "wave" animation
 type WaveMeta = {
@@ -44,12 +49,22 @@ function createBoard(cols: number, rows: number): Cell[] {
   }));
 }
 
-function placeMinesRandom(board: Cell[], cols: number, rows: number, mines: number, safeIndex: number) {
-  // ensure first click is safe: avoid placing mine at safeIndex and its neighbors
+/**
+ * Deterministic mine placement with injectable RNG.
+ * Keeps "first click and neighbors are safe" guarantee.
+ */
+function placeMinesDeterministic(
+  board: Cell[],
+  cols: number,
+  rows: number,
+  mines: number,
+  safeIndex: number,
+  rng: () => number
+) {
   const forbidden = new Set([safeIndex, ...neighbors(safeIndex, cols, rows)]);
   let placed = 0;
   while (placed < mines) {
-    const pos = Math.floor(Math.random() * board.length);
+    const pos = Math.floor(rng() * board.length);
     if (forbidden.has(pos)) continue;
     if (!board[pos].mine) {
       board[pos].mine = true;
@@ -85,18 +100,13 @@ function revealFlood(board: Cell[], start: number, cols: number, rows: number) {
  */
 function computeWaveDistances(revealedNow: Set<number>, startIdx: number, cols: number, rows: number): Map<number, number> {
   const dist = new Map<number, number>();
-  // start might be a numbered tile (only itself reveals) – still mark distance 0 if it's in the set
   if (!revealedNow.size) return dist;
-  if (revealedNow.has(startIdx)) {
-    dist.set(startIdx, 0);
-  } else {
-    // pick any of the revealed cells nearest to start as seed at 0
-    // but in classic behavior we want concentric wave from clicked cell; if start wasn't revealed (e.g., flagged) we fallback.
-    const first = [...revealedNow][0];
-    dist.set(first, 0);
-  }
 
-  const q: number[] = [ [...dist.keys()][0] ];
+  // Prefer starting wave from the clicked cell if it is part of the reveal set
+  const seed = revealedNow.has(startIdx) ? startIdx : [...revealedNow][0];
+  dist.set(seed, 0);
+
+  const q: number[] = [seed];
   while (q.length) {
     const u = q.shift()!;
     const du = dist.get(u)!;
@@ -114,8 +124,22 @@ function computeWaveDistances(revealedNow: Set<number>, startIdx: number, cols: 
 // It traverses only across cells that will be revealed in this action.
 /* duplicate removed */
 
-export default function MinesweeperGame() {
-  const { cols, rows, mines } = DIFF;
+export default function MinesweeperGame(): React.ReactElement {
+  const { cols, rows, mines } = DEFAULT_DIFFICULTY;
+
+  // Deterministic RNG lifecycle (replaces broken seed/setSeed usage)
+  const seedRef = useRef<number>(Date.now() >>> 0);
+  // Store the RNG function itself in the ref; initialize with a concrete function returning number
+  const rngRef = useRef<() => number>(Math.random);
+  const rebuildRng = (): void => {
+    let s = seedRef.current || 1;
+    rngRef.current = function next(): number {
+      s ^= s << 13;
+      s ^= s >>> 17;
+      s ^= s << 5;
+      return ((s >>> 0) % 0xffffffff) / 0xffffffff;
+    };
+  };
 
   const [board, setBoard] = useState<Cell[]>(() => createBoard(cols, rows));
   const [started, setStarted] = useState(false);
@@ -125,24 +149,37 @@ export default function MinesweeperGame() {
   const [time, setTime] = useState(0);
   const timerRef = useRef<number | null>(null);
 
-  // Wave animation meta (latest wave only), indexed by cell index
   const [waveMeta, setWaveMeta] = useState<WaveMeta[]>(() => Array(cols * rows).fill(null));
   const waveIdRef = useRef(0);
 
   const remaining = useMemo(() => Math.max(0, mines - flags), [mines, flags]);
 
   useEffect(() => {
+    // build RNG once on mount
+    rebuildRng();
+  }, []);
+  useEffect(() => {
     if (started && !dead && !won) {
-      timerRef.current = window.setInterval(() => setTime((t) => Math.min(999, t + 1)), 1000);
-      return () => {
-        if (timerRef.current) window.clearInterval(timerRef.current);
-      };
+      timerRef.current = window.setInterval(
+        () => setTime((t) => Math.min(MAX_TIMER, t + 1)),
+        TIMER_INTERVAL_MS
+      );
     }
-    return;
+    return () => {
+      if (timerRef.current) {
+        window.clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
   }, [started, dead, won]);
 
-  const reset = () => {
+  const reset = (): void => {
     if (timerRef.current) window.clearInterval(timerRef.current);
+
+    // advance seed and rebuild RNG from that seed
+    seedRef.current = (seedRef.current * 1664525 + 1013904223) >>> 0;
+    rebuildRng();
+
     setBoard(createBoard(cols, rows));
     setStarted(false);
     setDead(false);
@@ -169,7 +206,7 @@ export default function MinesweeperGame() {
     }
   };
 
-  const revealIndex = (idx: number) => {
+  const revealIndex = (idx: number): void => {
     if (dead || won) return;
     // We'll replicate legacy revealWave(): reveal set with delays per BFS distance.
     setBoard((prev) => {
@@ -178,8 +215,8 @@ export default function MinesweeperGame() {
       if (cell.revealed || cell.flagged) return prev;
 
       if (!started) {
-        // place mines on first reveal (safe first click)
-        placeMinesRandom(next, cols, rows, mines, idx);
+        // place mines on first reveal (safe first click) using deterministic RNG
+        placeMinesDeterministic(next, cols, rows, mines, idx, rngRef.current!);
         setStarted(true);
       }
 
@@ -226,7 +263,6 @@ export default function MinesweeperGame() {
       setWaveMeta(Array(cols * rows).fill(null));
 
       // Schedule the actual revealing with setTimeout per distance step, similar to legacy d*60ms
-      const BASE_DELAY = 60; // ms per step as in legacy
       distances.forEach((d, iCell) => {
         window.setTimeout(() => {
           setBoard((curr) => {
@@ -243,18 +279,18 @@ export default function MinesweeperGame() {
             m[iCell] = { waveId: thisWaveId, dist: d };
             return m;
           });
-        }, d * BASE_DELAY);
+        }, d * RIPPLE_STEP_MS);
       });
 
       // Run win check once after the longest scheduled delay
       const maxD = Math.max(0, ...distances.values());
-      window.setTimeout(() => checkWin(sim), maxD * BASE_DELAY + 5);
+      window.setTimeout(() => checkWin(sim), maxD * RIPPLE_STEP_MS + 5);
 
       return next; // return immediately; timeouts will progressively reveal
     });
   };
 
-  const toggleFlag = (idx: number) => {
+  const toggleFlag = (idx: number): void => {
     if (dead || won) return;
     setBoard((prev) => {
       const next = prev.map((c) => ({ ...c }));
@@ -274,7 +310,7 @@ export default function MinesweeperGame() {
     });
   };
 
-  const onCellMouseDown = (e: React.MouseEvent, idx: number) => {
+  const onCellMouseDown = (e: React.MouseEvent, idx: number): void => {
     if (e.button === 2) {
       // right click
       e.preventDefault();
@@ -284,13 +320,13 @@ export default function MinesweeperGame() {
     }
   };
 
-  const onContext = (e: React.MouseEvent) => {
+  const onContext = (e: React.MouseEvent): void => {
     e.preventDefault();
   };
 
   const gridStyle: React.CSSProperties = {
-    gridTemplateColumns: `repeat(${cols}, 28px)`,
-    gridTemplateRows: `repeat(${rows}, 28px)`,
+    gridTemplateColumns: `repeat(${cols}, ${CELL_PX}px)`,
+    gridTemplateRows: `repeat(${rows}, ${CELL_PX}px)`,
   };
 
   return (
