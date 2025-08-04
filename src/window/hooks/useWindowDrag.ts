@@ -123,12 +123,41 @@ export function useWindowDrag(
     const st = getState();
     if (st.maximized || !settings.windowDrag.enabled || isFullscreen()) return;
 
-    // Focusable header may steal focus on first click; prevent text selection and focus flicker
+    // Prevent text selection and focus flicker
     try { (e.target as HTMLElement)?.focus?.(); } catch {}
     if (typeof (e as any).preventDefault === "function") (e as any).preventDefault();
 
     startPoint.current = { x: e.clientX, y: e.clientY };
-    startPos.current = { x: st.x, y: st.y };
+
+    // Determine the live on-screen starting position to avoid snap-back between drags.
+    // Prefer inline left/top (sync writes in WindowManager onPatch), else computed rect, else state fallback.
+    let liveX = st.x;
+    let liveY = st.y;
+    try {
+      // Find the nearest .window element by traversing from header/content
+      const rootEl =
+        (opts?.headerEl?.closest?.(".window") as HTMLElement | null) ??
+        (opts?.contentEl?.closest?.(".window") as HTMLElement | null) ??
+        null;
+      if (rootEl) {
+        const inlineLeft = (rootEl.style && rootEl.style.left) ? parseFloat(rootEl.style.left) : NaN;
+        const inlineTop = (rootEl.style && rootEl.style.top) ? parseFloat(rootEl.style.top) : NaN;
+        if (Number.isFinite(inlineLeft) && Number.isFinite(inlineTop)) {
+          liveX = inlineLeft;
+          liveY = inlineTop;
+        } else {
+          // Fall back to bounding rect relative to viewport
+          const rect = rootEl.getBoundingClientRect();
+          // The window root container is fixed to the viewport; use rect.left/top directly.
+          liveX = rect.left;
+          liveY = rect.top;
+        }
+      }
+    } catch {
+      // ignore, keep state fallback
+    }
+
+    startPos.current = { x: liveX, y: liveY };
     dragActive.current = false;
 
     // Hold-to-drag support
@@ -144,8 +173,8 @@ export function useWindowDrag(
     try {
       (opts?.headerEl ?? (e.target as Element))?.setPointerCapture?.(e.pointerId);
     } catch {}
-    // Use non-passive move so we can prevent default to avoid text selection on some browsers
-    window.addEventListener("pointermove", onMove as any, { passive: true } as AddEventListenerOptions);
+    // Add non-passive move listener so preventDefault is honored during drag
+    window.addEventListener("pointermove", onMove as any, { passive: false } as AddEventListenerOptions);
     window.addEventListener("pointerup", onUp as any, { passive: true } as AddEventListenerOptions);
     window.addEventListener("pointercancel", onUp as any, { passive: true } as AddEventListenerOptions);
   }
