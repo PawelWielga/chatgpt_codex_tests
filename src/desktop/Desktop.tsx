@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import "./desktop.css";
 import { useWindowManager } from "@/window/WindowManager";
 import { getWindowDefaults } from "@/window/registry";
@@ -27,14 +27,21 @@ export default function Desktop(): React.ReactElement {
       { id: "pong", icon: "🏓", label: "Pong", implemented: false },
       { id: "cards", icon: "🃏", label: "Ewolucja", implemented: false },
       { id: "calc", icon: "🖩", label: "Catculator", implemented: false },
-      { id: "settings", icon: "⚙️", label: "Ustawienia", implemented: false },
+      // Settings panel is implemented (modal)
+      { id: "settings", icon: "⚙️", label: "Ustawienia", implemented: true },
     ],
     []
   );
 
   const visibleShortcuts = shortcuts.filter((s) => s.implemented);
 
+  const [showSettings, setShowSettings] = useState(false);
+
   const handleOpenById = async (id: string): Promise<void> => {
+    if (id === "settings") {
+      setShowSettings(true);
+      return;
+    }
     const def = getWindowDefaults(id);
     if (!def) return; // not yet implemented or unknown
     // Lazy-load component
@@ -148,8 +155,25 @@ export default function Desktop(): React.ReactElement {
     taskRefs.current[i] = el;
   };
 
-  return (
-    <div className="desktop-root">
+  // Lazy-load settings panel and provider chunk (single definition)
+  const PlayerSettingsPanel = React.useMemo(
+    () => React.lazy(() => import("@/settings/player/PlayerSettingsPanel")),
+    []
+  );
+  const [PlayerSettingsProvider, setPlayerSettingsProvider] =
+    useState<React.ComponentType<{ children: React.ReactNode }> | null>(null);
+  useEffect(() => {
+    let mounted = true;
+    import("@/settings/player/PlayerSettingsContext").then((mod) => {
+      if (mounted) setPlayerSettingsProvider(() => mod.PlayerSettingsProvider as React.ComponentType<{ children: React.ReactNode }>);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+ return (
+   <div className="desktop-root">
       {/* Wallpaper layer */}
       <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }} aria-hidden>
         {(() => {
@@ -186,7 +210,13 @@ export default function Desktop(): React.ReactElement {
             className="desktop-icon"
             data-icon={s.icon}
             title={s.label}
-            onClick={() => handleOpenById(s.id)}
+            onClick={() => {
+              if (s.id === "settings") {
+                setShowSettings(true);
+              } else {
+                handleOpenById(s.id);
+              }
+            }}
             role="gridcell"
             aria-label={s.label}
             tabIndex={i === activeIndex ? 0 : -1}
@@ -231,6 +261,20 @@ export default function Desktop(): React.ReactElement {
           <span id="clock" className="clock" />
         </div>
       </div>
+
+      {/* Settings modal portal-like render above taskbar */}
+      <React.Suspense fallback={null}>
+        {PlayerSettingsProvider && (
+          <PlayerSettingsProvider>
+            <PlayerSettingsPanel
+              open={showSettings}
+              onClose={() => setShowSettings(false)}
+              variant={window.innerWidth <= 640 ? "drawer" : "modal"}
+              initialFocusSelector="#ps-name"
+            />
+          </PlayerSettingsProvider>
+        )}
+      </React.Suspense>
     </div>
   );
 }
