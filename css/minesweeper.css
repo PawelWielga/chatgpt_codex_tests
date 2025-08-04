@@ -1,7 +1,7 @@
 #mine-board {
     display: grid;
-    grid-template-columns: repeat(8, 30px);
-    grid-template-rows: repeat(8, 30px);
+    grid-template-columns: repeat(var(--size, 8), 30px);
+    grid-template-rows: repeat(var(--size, 8), 30px);
     gap: 2px;
 }
 
