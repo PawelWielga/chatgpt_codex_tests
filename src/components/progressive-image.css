@@ -1,0 +1,16 @@
+.progressive-image {
+  position: relative;
+  overflow: hidden;
+  background: #0a0a0a; /* avoids white flash */
+}
+
+.progressive-image__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* good for wallpapers */
+  display: block;
+  will-change: opacity;
+  backface-visibility: hidden;
+}

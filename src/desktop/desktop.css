@@ -3,8 +3,8 @@ html, body, #root { height: 100%; }
 body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 .desktop-root {
   min-height: 100%;
-  background: url('/legacy_backup/wallpapers/forest.jpg') no-repeat center center fixed;
-  background-size: cover;
+  /* Background moved to ProgressiveImage; keep a neutral fallback color only */
+  background: #0a0a0a;
   overflow: hidden;
   position: relative;
 }

@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from "react";
 import "./desktop.css";
 import { useWindowManager } from "@/window/WindowManager";
 import { getWindowDefaults } from "@/window/registry";
+import ProgressiveImage from "@/components/ProgressiveImage";
 
 type Shortcut = {
   id: string;
@@ -149,6 +150,30 @@ export default function Desktop(): React.ReactElement {
 
   return (
     <div className="desktop-root">
+      {/* Wallpaper layer */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }} aria-hidden>
+        {(() => {
+          // Use Vite's base path; fallback to "/"
+          const base: string = (import.meta as any).env?.BASE_URL ?? "/";
+          const low = `${base}wallpapers/forest_low.jpg`;
+          const hi = `${base}wallpapers/forest.jpg`;
+          return (
+            <ProgressiveImage
+              lowSrc={low}
+              src={hi}
+              alt="Wallpaper"
+              // Longer, smoother transition + subtle zoom
+              crossfadeMs={1800}
+              blurPreview={true}
+              preserveAspectRatio={false}
+              zoomOnReveal={true}
+              blurUnwind={true}
+            />
+          );
+        })()}
+      </div>
+
+      {/* Foreground grid */}
       <div
         className="desktop-grid"
         role="grid"
