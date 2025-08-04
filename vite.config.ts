@@ -12,7 +12,10 @@ const base = baseFromEnv && baseFromEnv.trim().length > 0 ? baseFromEnv : "/";
 
 export default defineConfig({
   plugins: [react()],
-  base,
+  // Force correct base for GitHub Pages project site:
+  // https://pawelwielga.github.io/desktop-games/
+  // This avoids absolute /assets/... pointing to the root user page.
+  base: "/desktop-games/",
   resolve: {
     alias: {
       "@": srcPath,
