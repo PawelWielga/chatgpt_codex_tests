@@ -65,11 +65,14 @@
         }
         .window-header {
             height: 32px; background: #f3f3f3; display: flex; align-items: center;
-            justify-content: space-between; padding: 0 12px; cursor: move; user-select: none;
+            justify-content: space-between; padding: 0 12px; user-select: none;
+            /* Only start drag from empty header area, not from controls */
+            cursor: default;
+            touch-action: none; /* allow custom touch dragging without browser gestures */
         }
         .window-title { font-size: 14px; color: #333; }
         .window-controls { display: flex; gap: 6px; }
-        .window-control { width: 28px; height: 28px; border: none; background: transparent; cursor: pointer; color: #666; }
+        .window-control { width: 28px; height: 28px; border: none; background: transparent; cursor: pointer; color: #666; touch-action: manipulation; }
         .window-control:hover { background: rgba(0,0,0,0.08); border-radius: 4px; }
         .window-control.close:hover { background: #e81123; color: #fff; }
         .window-content { height: calc(100% - 32px); padding: 0; overflow: hidden; }
@@ -218,9 +221,30 @@
                 win.style.height = 'calc(100vh - 48px)';
                 win.dataset.max = '1';
             }
+            // Prevent duplicate bottom bars inside iframes by injecting CSS (same-origin only)
+            const cssBlock = `
+                <style>
+                    .taskbar, #taskbar { display: none !important; }
+                    footer.site-footer, .site-footer { display: none !important; }
+                    .navbar, .bottom-bar { display: none !important; }
+                </style>
+            `;
+            win.querySelector('iframe')?.addEventListener('load', function () {
+                try {
+                    const doc = this.contentDocument;
+                    if (doc && doc.head) {
+                        const styleWrapper = doc.createElement('div');
+                        styleWrapper.innerHTML = cssBlock;
+                        const styleEl = styleWrapper.firstElementChild;
+                        if (styleEl) doc.head.appendChild(styleEl);
+                    }
+                } catch (e) {
+                    // Cross-origin or blocked: ignore
+                }
+            });
 
             win.innerHTML = `
-                <div class="window-header" onmousedown="startDrag(event, '${id}-window')" ondblclick="maximizeWindow('${id}-window')">
+                <div class="window-header" onmousedown="startDrag(event, '${id}-window')" ontouchstart="/* handled in JS */" ondblclick="maximizeWindow('${id}-window')">
                     <div class="window-title">${title}</div>
                     <div class="window-controls">
                         <button class="window-control minimize" onclick="minimizeWindow('${id}-window')" title="Minimalizuj">−</button>
@@ -232,16 +256,61 @@
                     <iframe src="${url}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
                 </div>
             `;
-            // Ensure iframe doesn't steal pointer during drag
+            // Ensure iframe doesn't steal pointer during drag (desktop)
             const header = win.querySelector('.window-header');
             const iframe = win.querySelector('iframe');
             if (header && iframe) {
-                header.addEventListener('mousedown', () => {
+                header.addEventListener('mousedown', (e) => {
+                    if (!(e.target instanceof HTMLElement) || e.target.closest('.window-controls')) return;
                     iframe.style.pointerEvents = 'none';
-                });
+                }, { passive: true });
                 document.addEventListener('mouseup', () => {
                     iframe.style.pointerEvents = 'auto';
-                });
+                }, { passive: true });
+
+                // Mobile/touch: enable controls to work and support dragging
+                header.addEventListener('touchstart', (e) => {
+                    const t = e.target;
+                    if (!(t instanceof HTMLElement)) return;
+                    // If tap on control buttons, don't start drag; let click fire
+                    if (t.closest('.window-controls') || t.classList.contains('window-control')) {
+                        return;
+                    }
+                    iframe.style.pointerEvents = 'none';
+                    const touch = e.touches[0];
+                    startDragLikeTouch(touch.clientX, touch.clientY, win.id);
+                    e.preventDefault();
+                }, { passive: false });
+                header.addEventListener('touchmove', (e) => {
+                    if (!dragData) return;
+                    const touch = e.touches[0];
+                    dragLikeTouch(touch.clientX, touch.clientY);
+                    e.preventDefault();
+                }, { passive: false });
+                header.addEventListener('touchend', () => {
+                    stopDrag();
+                    iframe.style.pointerEvents = 'auto';
+                }, { passive: true });
+
+                // Touch support for mobile
+                header.addEventListener('touchstart', (e) => {
+                    const t = e.target;
+                    if (!(t instanceof HTMLElement) || t.closest('.window-controls')) return;
+                    iframe.style.pointerEvents = 'none';
+                    const touch = e.touches[0];
+                    startDragLikeTouch(touch.clientX, touch.clientY, win.id);
+                    e.preventDefault();
+                }, { passive: false });
+                header.addEventListener('touchmove', (e) => {
+                    if (!dragData) return;
+                    const touch = e.touches[0];
+                    dragLikeTouch(touch.clientX, touch.clientY);
+                    e.preventDefault();
+                }, { passive: false });
+                header.addEventListener('touchend', () => {
+                    stopDrag();
+                    iframe.style.pointerEvents = 'auto';
+                }, { passive: true });
             }
 
             document.body.appendChild(win);
@@ -321,19 +390,50 @@
 
         function startDrag(event, windowId) {
             const w = document.getElementById(windowId);
+            if (!w) return;
+            // Don't start drag when clicking on window controls
+            if (event && event.target && event.target.closest && event.target.closest('.window-controls')) {
+                return;
+            }
             const rect = w.getBoundingClientRect();
             dragData = {
                 id: windowId,
                 offsetX: event.clientX - rect.left,
                 offsetY: event.clientY - rect.top
             };
-            // Activate overlay to capture mouse events above iframes
             const ov = ensureOverlay();
             ov.style.pointerEvents = 'auto';
             document.addEventListener('mousemove', drag, { passive: false });
             document.addEventListener('mouseup', stopDrag, { passive: false });
             w.style.zIndex = String(++zTop);
             event.preventDefault();
+        }
+
+        // Touch helpers
+        function startDragLikeTouch(clientX, clientY, windowId) {
+            const w = document.getElementById(windowId);
+            if (!w) return;
+            const rect = w.getBoundingClientRect();
+            dragData = {
+                id: windowId,
+                offsetX: clientX - rect.left,
+                offsetY: clientY - rect.top
+            };
+            const ov = ensureOverlay();
+            ov.style.pointerEvents = 'auto';
+            w.style.zIndex = String(++zTop);
+        }
+        function dragLikeTouch(clientX, clientY) {
+            if (!dragData) return;
+            const w = document.getElementById(dragData.id);
+            const parentWidth = document.body.clientWidth;
+            const parentHeight = document.body.clientHeight - 48;
+            let newX = clientX - dragData.offsetX;
+            let newY = clientY - dragData.offsetY;
+            newX = Math.max(0, Math.min(newX, parentWidth - w.offsetWidth));
+            newY = Math.max(0, Math.min(newY, parentHeight - w.offsetHeight));
+            w.style.left = newX + 'px';
+            w.style.top = newY + 'px';
         }
 
         function drag(event) {
