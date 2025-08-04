@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to gh-page branch
 
 on:
   push:
@@ -7,12 +7,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
+  group: gh-page
   cancel-in-progress: true
 
 env:
@@ -43,18 +41,17 @@ jobs:
           # Add GitHub Pages SPA fallback (serve index.html for client routes)
           cp dist/index.html dist/404.html
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish to gh-page branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-page || true
+          git switch --orphan gh-page
+          git rm -rf . || true
+          cp -R dist/* .
+          # Preserve a CNAME if it exists in the repository root
+          if [ -f CNAME ]; then cp CNAME ./; fi
+          touch .nojekyll
+          git add -A
+          git commit -m "chore: deploy to gh-page [skip ci]" || echo "Nothing to commit"
+          git push -f origin gh-page
