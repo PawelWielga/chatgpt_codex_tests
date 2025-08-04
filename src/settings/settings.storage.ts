@@ -1,10 +1,10 @@
-import { Settings, defaultSettings } from "./settings.types";
+import { Settings, defaultSettings, DragModifier } from "./settings.types";
 
-const SETTINGS_KEY = "app:settings:v1";
+const SETTINGS_KEY = "app:settings:v2";
 
 export function loadSettings(): Settings {
   try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
+    const raw = localStorage.getItem(SETTINGS_KEY) ?? localStorage.getItem("app:settings:v1");
     if (!raw) return defaultSettings;
     const parsed = JSON.parse(raw);
     return migrateSettings(parsed);
@@ -30,6 +30,19 @@ export function migrateSettings(input: any): Settings {
     difficulty: isDifficulty(input?.difficulty) ? input.difficulty : defaultSettings.difficulty,
     sound: typeof input?.sound === "boolean" ? input.sound : defaultSettings.sound,
     theme: isTheme(input?.theme) ? input.theme : defaultSettings.theme,
+    windowDrag: {
+      enabled: typeof input?.windowDrag?.enabled === "boolean" ? input.windowDrag.enabled : defaultSettings.windowDrag.enabled,
+      viewportDragModifier: isModifier(input?.windowDrag?.viewportDragModifier) ? input.windowDrag.viewportDragModifier : defaultSettings.windowDrag.viewportDragModifier,
+      startThresholdPx: toNumberInRange(input?.windowDrag?.startThresholdPx, 0, 32, defaultSettings.windowDrag.startThresholdPx),
+      holdToDragMs: toNumberInRange(input?.windowDrag?.holdToDragMs, 0, 1000, defaultSettings.windowDrag.holdToDragMs),
+      snapEnabled: typeof input?.windowDrag?.snapEnabled === "boolean" ? input.windowDrag.snapEnabled : defaultSettings.windowDrag.snapEnabled,
+      snapThresholdPx: toNumberInRange(input?.windowDrag?.snapThresholdPx, 0, 64, defaultSettings.windowDrag.snapThresholdPx),
+      persistPositions: typeof input?.windowDrag?.persistPositions === "boolean" ? input.windowDrag.persistPositions : defaultSettings.windowDrag.persistPositions,
+    },
+    accessibility: {
+      highContrastTargets: typeof input?.accessibility?.highContrastTargets === "boolean" ? input.accessibility.highContrastTargets : defaultSettings.accessibility.highContrastTargets,
+      keyboardMoveResize: typeof input?.accessibility?.keyboardMoveResize === "boolean" ? input.accessibility.keyboardMoveResize : defaultSettings.accessibility.keyboardMoveResize,
+    },
   };
   return out;
 }
@@ -40,4 +53,13 @@ function isDifficulty(v: any): v is Settings["difficulty"] {
 
 function isTheme(v: any): v is Settings["theme"] {
   return v === "light" || v === "dark";
+}
+
+function isModifier(v: any): v is DragModifier {
+  return v === "none" || v === "alt" || v === "ctrl" || v === "shift" || v === "meta";
+}
+
+function toNumberInRange(v: any, min: number, max: number, fallback: number): number {
+  const n = typeof v === "number" && Number.isFinite(v) ? v : fallback;
+  return Math.min(max, Math.max(min, n));
 }

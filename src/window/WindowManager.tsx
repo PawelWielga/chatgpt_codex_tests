@@ -10,6 +10,8 @@ import React, {
 import "./window.css";
 import { useWindowResize } from "./hooks/useWindowResize";
 import { getWindowDefaults } from "./registry";
+import { useWindowDrag } from "./hooks/useWindowDrag";
+import { useSettings } from "@/settings/SettingsContext";
 
 /** Public spec for opening a window */
 export type WindowSpec = {
@@ -83,6 +85,7 @@ export function useWindowManager(): Ctx {
 export function WindowManager({ children }: { children: React.ReactNode }): React.ReactElement {
   const [windows, setWindows] = useState<WindowState[]>([]);
   const zCounter = useRef(1500);
+  const { settings } = useSettings();
 
   const open = useCallback((spec: WindowSpec) => {
     setWindows((prev) => {
@@ -106,14 +109,31 @@ export function WindowManager({ children }: { children: React.ReactNode }): Reac
         id: spec.id,
         content: spec.content,
         title: spec.title ?? defaults?.title ?? spec.id,
-        x:
-          spec.x ??
-          defaults?.x ??
-          100 + Math.floor(Math.random() * 80),
-        y:
-          spec.y ??
-          defaults?.y ??
-          60 + Math.floor(Math.random() * 60),
+        x: (() => {
+          // Load persisted position if enabled
+          if (settings.windowDrag.persistPositions) {
+            try {
+              const raw = localStorage.getItem(`wm:pos:${spec.id}`);
+              if (raw) {
+                const parsed = JSON.parse(raw);
+                if (typeof parsed?.x === "number") return parsed.x as number;
+              }
+            } catch {}
+          }
+          return spec.x ?? defaults?.x ?? 100 + Math.floor(Math.random() * 80);
+        })(),
+        y: (() => {
+          if (settings.windowDrag.persistPositions) {
+            try {
+              const raw = localStorage.getItem(`wm:pos:${spec.id}`);
+              if (raw) {
+                const parsed = JSON.parse(raw);
+                if (typeof parsed?.y === "number") return parsed.y as number;
+              }
+            } catch {}
+          }
+          return spec.y ?? defaults?.y ?? 60 + Math.floor(Math.random() * 60);
+        })(),
         width,
         height,
         minWidth,
@@ -126,7 +146,7 @@ export function WindowManager({ children }: { children: React.ReactNode }): Reac
       };
       return [...prev, next];
     });
-  }, []);
+  }, [settings.windowDrag.persistPositions]);
 
   const close = useCallback((id: string) => {
     setWindows((prev) => prev.filter((w) => w.id !== id));
@@ -270,6 +290,17 @@ export function WindowManager({ children }: { children: React.ReactNode }): Reac
               setWindows((prev) =>
                 prev.map((x) => (x.id === w.id ? { ...x, ...patch } : x))
               );
+
+              // Persist position if enabled (always attempt; storage errors ignored)
+              try {
+                if (("x" in patch || "y" in patch)) {
+                  const key = `wm:pos:${w.id}`;
+                  const nx = ("x" in patch && typeof patch.x === "number") ? patch.x : w.x;
+                  const ny = ("y" in patch && typeof patch.y === "number") ? patch.y : w.y;
+                  localStorage.setItem(key, JSON.stringify({ x: nx, y: ny }));
+                }
+              } catch {}
+
               // Force immediate style sync for the active window to bypass any render delay
               if (("x" in patch || "y" in patch)) {
                 const el = document.querySelector<HTMLElement>(`.window[aria-label="${w.title}"]`);
@@ -313,8 +344,23 @@ function WindowFrame(props: {
 
   useEffect(() => () => resize.onCleanup(), [resize]);
 
-  // Dragging removed per request; keep ref for double-click maximize/focus only
+  // Dragging
   const headerRef = React.useRef<HTMLDivElement | null>(null);
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Bind drag behavior
+  useWindowDrag(
+    (p) => props.onPatch(p),
+    () => ({
+      id: w.id,
+      x: w.x,
+      y: w.y,
+      width: w.width,
+      height: w.height,
+      maximized: w.maximized,
+    }),
+    { headerEl: headerRef.current, contentEl: contentRef.current }
+  );
 
   const onResizeDown = (e: React.MouseEvent) => {
     props.onFocus(w.id);
@@ -332,6 +378,7 @@ function WindowFrame(props: {
     zIndex: w.z,
     position: "absolute",
     transform: "translateZ(0)",
+    pointerEvents: "auto"
   };
 
   const ariaModal = props.topMostId === w.id && w.maximized;
@@ -350,9 +397,22 @@ function WindowFrame(props: {
         ref={headerRef}
         onDoubleClick={() => props.onMaximize(w.id)}
         tabIndex={0}
+        aria-roledescription="Window title bar. Drag to move, double click to maximize."
+        title="Drag to move, double click to maximize"
+        onPointerDown={(e) => {
+          // Ensure window is focused before drag so z-index and style sync apply to the active window
+          props.onFocus(w.id);
+        }}
       >
         <div className="window-title">{w.title}</div>
-        <div className="window-controls">
+        {/* Prevent drags starting on control buttons from bubbling to header */}
+        <div
+          className="window-controls"
+          onPointerDown={(e) => {
+            // Stop header drag initiation when pressing buttons
+            e.stopPropagation();
+          }}
+        >
           <button
             className="window-control"
             type="button"
@@ -383,7 +443,16 @@ function WindowFrame(props: {
           </button>
         </div>
       </div>
-      <div className="window-content">{w.content}</div>
+      <div
+        className="window-content"
+        ref={contentRef}
+        onPointerDown={() => {
+          // Also focus when starting content-modifier drags on first interaction
+          props.onFocus(w.id);
+        }}
+      >
+        {w.content}
+      </div>
       {
         !w.maximized && (
           <div

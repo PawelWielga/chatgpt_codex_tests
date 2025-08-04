@@ -32,6 +32,7 @@
   z-index: var(--z-window);
   /* Enable smooth visual feedback during drag */
   will-change: left, top;
+  touch-action: none; /* ensure pointer events behave consistently during drag */
 }
 
 /* Glassmorphism window titlebar — mimic legacy styles exactly */
@@ -150,4 +151,13 @@
   outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, #ffffff 30%);
   outline-offset: 2px;
   border-radius: var(--radius-2);
+}
+
+/* High-contrast larger hit targets when enabled via data attribute on root */
+:root[data-a11y-targets="high"] .window-resizer {
+  width: 22px;
+  height: 22px;
+}
+:root[data-a11y-targets="high"] .window-header {
+  min-height: 40px;
 }
