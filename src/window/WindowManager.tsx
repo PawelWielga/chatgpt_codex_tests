@@ -63,10 +63,9 @@ const MIN_WIDTH_DEFAULT = 520;
 const MIN_HEIGHT_DEFAULT = 640;
 const KEY_NUDGE_STEP = 10;
 
-// Ensure stable context identity and readable name for devtools/Fast Refresh
+// Stable context for devtools; avoid redundant redefinition
 const WindowCtx = createContext<Ctx | undefined>(undefined);
-(WindowCtx as any).displayName = "WindowCtx";
-Object.defineProperty(WindowCtx, "displayName", { value: "WindowCtx" });
+(WindowCtx as unknown as { displayName?: string }).displayName = "WindowCtx";
 
 /**
  * Custom hook to access WindowManager context.
@@ -235,11 +234,11 @@ export function WindowManager({ children }: { children: React.ReactNode }): Reac
               e.key === "ArrowDown" ? KEY_NUDGE_STEP : e.key === "ArrowUp" ? -KEY_NUDGE_STEP : 0;
             const nx = Math.max(
               0,
-              Math.min((w.x ?? 0) + dx, Math.max(0, window.innerWidth - (w.width ?? 0)))
+              Math.min(w.x + dx, Math.max(0, window.innerWidth - w.width)) // remove redundant nullish checks
             );
             const ny = Math.max(
               0,
-              Math.min((w.y ?? 0) + dy, Math.max(0, window.innerHeight - (w.height ?? 0)))
+              Math.min(w.y + dy, Math.max(0, window.innerHeight - w.height))
             );
             return { ...w, x: nx, y: ny };
           })
@@ -360,6 +359,7 @@ function WindowFrame(props: {
         <div className="window-controls">
           <button
             className="window-control"
+            type="button"
             title="Minimalizuj"
             onClick={() => props.onMinimize(w.id)}
             aria-label={`Minimalizuj ${w.title}`}
@@ -368,6 +368,7 @@ function WindowFrame(props: {
           </button>
           <button
             className="window-control"
+            type="button"
             title="Maksymalizuj"
             onClick={() => props.onMaximize(w.id)}
             aria-pressed={w.maximized}
@@ -377,6 +378,7 @@ function WindowFrame(props: {
           </button>
           <button
             className="window-control close"
+            type="button"
             title="Zamknij"
             onClick={() => props.onClose(w.id)}
             aria-label={`Zamknij ${w.title}`}
@@ -386,12 +388,23 @@ function WindowFrame(props: {
         </div>
       </div>
       <div className="window-content">{w.content}</div>
-      {!w.maximized && <div className="window-resizer" onMouseDown={onResizeDown} aria-label="Resize window" role="separator" />}
+      {
+        // Only show resizer when not maximized; add title for a11y discoverability
+        !w.maximized && (
+          <div
+            className="window-resizer"
+            onMouseDown={onResizeDown}
+            aria-label="Resize window"
+            role="separator"
+            title="Resize window"
+          />
+        )
+      }
     </div>
   );
 }
 
-// Utility to determine if this window is the top-most interactive one (kept for future use)
+// Utility placeholder retained intentionally for future feature work
 function isTopMost(_w: WindowState): boolean {
   return false;
 }

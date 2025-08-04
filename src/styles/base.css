@@ -63,52 +63,33 @@ body {
   line-height: 1.4;
 }
 
-/* Top-right red construction banner */
-.construction-banner {
+/* Watermark: bottom-right, subtle, persistent, non-interactive */
+.watermark {
   position: fixed;
-
-  /* Robust corner anchor: guaranteed visible without magic offsets */
-  top: 0;
-  right: 0;
-  z-index: 2147483647; /* max to sit above windows */
-
-  /* Place the ribbon diagonally across the corner and pull it into view */
-  transform: translate(50%, -50%) rotate(45deg);
-  transform-origin: top right;
-
-  background: linear-gradient(90deg, #b91c1c, #ef4444);
-  color: #fff;
-
-  padding: 10px 80px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-
-  pointer-events: none; /* do not block clicks below */
+  right: 10px;
+  bottom: 8px;
+  z-index: 2147483647;
+  color: #B0B0B0;
+  font-family: "Segoe UI", Segoe UI, Roboto, system-ui, -apple-system, sans-serif;
+  line-height: 1.2;
+  text-align: right;
+  pointer-events: none; /* never intercept clicks */
+  user-select: none;
+  opacity: 0.9; /* semi-transparent, but readable */
+  text-shadow:
+    0 1px 1px rgba(0,0,0,0.35),
+    0 0 1px rgba(0,0,0,0.25); /* soft shadow for varied backgrounds */
   white-space: nowrap;
 }
 
-/* Larger screens: slightly beefier padding */
+/* Desktop default size ~13px */
 @media (min-width: 768px) {
-  .construction-banner {
-    padding: 10px 72px;
-    font-size: 12px;
-  }
+  .watermark { font-size: 13px; }
 }
 
-/* Small screens: slightly reduce translation and padding to fit */
-@media (max-width: 520px) {
-  .construction-banner {
-    top: 0;
-    right: 0;
-    transform: translate(40%, -40%) rotate(45deg);
-    padding: 8px 64px;
-    font-size: 11px;
-  }
+/* Small screens: downscale slightly to avoid overlap */
+@media (max-width: 767.98px) {
+  .watermark { font-size: 12px; right: 8px; bottom: 6px; }
 }
 
 /* Focus ring for keyboard users */
