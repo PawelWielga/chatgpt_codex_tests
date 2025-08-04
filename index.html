@@ -2,11 +2,223 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Include viewport-fit for safe-area support on modern mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Game SPA</title>
+
+    <!-- Mobile support notice styles (lightweight, no layout shift) -->
+    <style>
+      /* Base: hidden by default, revealed when small/unsupported */
+      #mobile-support-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 999999; /* above app layers */
+        display: none; /* toggled by JS and by noscript media query */
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.92); /* slate-900 with opacity */
+        color: #ffffff;
+        text-align: center;
+        padding: 24px;
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+      }
+      #mobile-support-overlay[aria-hidden="false"] { display: flex; }
+      #mobile-support-overlay .content {
+        max-width: 640px;
+        margin: 0 auto;
+        background: rgba(2, 6, 23, 0.35);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 12px;
+        padding: 20px 16px;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+      }
+      #mobile-support-overlay h1 {
+        font-size: clamp(18px, 4.5vw, 24px);
+        margin: 0 0 10px 0;
+        line-height: 1.25;
+      }
+      #mobile-support-overlay p {
+        font-size: clamp(14px, 3.8vw, 18px);
+        margin: 0 0 16px 0;
+        color: #e5e7eb;
+      }
+      #mobile-support-overlay .actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+      #mobile-support-overlay .btn {
+        appearance: none;
+        border: 1px solid rgba(255,255,255,0.22);
+        background: rgba(255,255,255,0.1);
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      #mobile-support-overlay .btn:hover {
+        background: rgba(255,255,255,0.18);
+      }
+
+      /* Prevent scroll behind overlay without layout shift */
+      html.mobile-overlay-lock, body.mobile-overlay-lock {
+        overflow: hidden;
+      }
+
+      /* No-JS fallback: show for small screens via media query */
+      @media (max-width: 767px) {
+        noscript .mobile-support-noscript {
+          display: flex !important;
+        }
+      }
+    </style>
   </head>
   <body>
+    <!-- Progressive enhancement: noscript fallback -->
+    <noscript>
+      <div id="mobile-support-overlay" class="mobile-support-noscript" role="dialog" aria-modal="true" aria-hidden="false">
+        <div class="content">
+          <h1>This website is optimized for larger vertical screens.</h1>
+          <p>Please use a tablet, laptop, or rotate your device to portrait on a larger display.</p>
+        </div>
+      </div>
+    </noscript>
+
+    <!-- JS-driven overlay -->
+    <div id="mobile-support-overlay" role="dialog" aria-modal="true" aria-live="polite" aria-hidden="true">
+      <div class="content" role="document">
+        <h1 id="mobile-support-title">This website is optimized for larger vertical screens.</h1>
+        <p id="mobile-support-message">
+          Please use a tablet, laptop, or rotate your device to portrait on a larger display.
+        </p>
+        <div class="actions">
+          <button id="mobile-support-recheck" type="button" class="btn" aria-describedby="mobile-support-message">
+            Check Again
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div id="root"></div>
+
+    <script>
+      (function () {
+        // Minimum usable thresholds
+        var MIN_WIDTH = 768;   // px
+        var MIN_HEIGHT = 600;  // px
+
+        var overlay = document.getElementById('mobile-support-overlay');
+        var recheck = document.getElementById('mobile-support-recheck');
+        var message = document.getElementById('mobile-support-message');
+
+        function getViewport() {
+          // Use visualViewport when available for more accurate mobile UI measurements
+          var vv = window.visualViewport;
+          return vv ? { w: Math.floor(vv.width), h: Math.floor(vv.height) }
+                    : { w: Math.floor(window.innerWidth), h: Math.floor(window.innerHeight) };
+        }
+
+        function isPortrait() {
+          if (window.screen && typeof window.screen.orientation === 'object' && window.screen.orientation) {
+            return window.screen.orientation.type.startsWith('portrait');
+          }
+          return window.matchMedia('(orientation: portrait)').matches;
+        }
+
+        function meetsSize() {
+          var vp = getViewport();
+          return vp.w >= MIN_WIDTH && vp.h >= MIN_HEIGHT;
+        }
+
+        function smallDevice() {
+          var vp = getViewport();
+          // Trigger on narrow viewports OR too small height
+          return (vp.w < MIN_WIDTH) || (vp.h < MIN_HEIGHT);
+        }
+
+        function computeMessage() {
+          var vp = getViewport();
+          var portrait = isPortrait();
+
+          // If device is small and landscape, suggest rotating to portrait if that might help
+          if (vp.w < MIN_WIDTH && !portrait) {
+            // If rotating to portrait would give larger vertical height, we still need MIN_WIDTH though.
+            // Suggest rotate only if current height already meets MIN_HEIGHT; otherwise larger device.
+            if (vp.h >= MIN_HEIGHT) {
+              return 'This website is optimized for larger vertical screens. Try rotating your device to portrait, or use a tablet or laptop.';
+            }
+            return 'This website is optimized for larger vertical screens. Please use a tablet or laptop.';
+          }
+
+          // If height is the limiting factor
+          if (vp.h < MIN_HEIGHT) {
+            return 'This website is optimized for larger vertical screens. Please use a tablet or laptop.';
+          }
+
+          // Default small width case
+          return 'This website is optimized for larger vertical screens. Please use a tablet, laptop, or rotate your device to portrait on a larger display.';
+        }
+
+        function setLock(locked) {
+          // Avoid layout shift by not toggling padding; app uses fixed layers.
+          if (locked) {
+            document.documentElement.classList.add('mobile-overlay-lock');
+            document.body.classList.add('mobile-overlay-lock');
+          } else {
+            document.documentElement.classList.remove('mobile-overlay-lock');
+            document.body.classList.remove('mobile-overlay-lock');
+          }
+        }
+
+        function updateOverlay() {
+          var show = smallDevice() && !meetsSize();
+          if (show) {
+            message && (message.textContent = computeMessage());
+            overlay.setAttribute('aria-hidden', 'false');
+            setLock(true);
+          } else {
+            overlay.setAttribute('aria-hidden', 'true');
+            setLock(false);
+          }
+        }
+
+        // Initial check after content is interactive
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', updateOverlay, { once: true });
+        } else {
+          updateOverlay();
+        }
+
+        // Re-evaluate on resize and orientation changes
+        var ro = null;
+        try {
+          // Use ResizeObserver on visualViewport where supported for more fidelity
+          if (window.visualViewport && 'ResizeObserver' in window) {
+            ro = new ResizeObserver(updateOverlay);
+            ro.observe(document.body);
+          }
+        } catch(_) {}
+
+        window.addEventListener('resize', updateOverlay, { passive: true });
+        window.addEventListener('orientationchange', function () {
+          // Debounce slight delays on mobile orientation changes
+          setTimeout(updateOverlay, 150);
+        }, { passive: true });
+
+        // Optional manual re-check
+        if (recheck) recheck.addEventListener('click', updateOverlay);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function () {
+          setLock(false);
+          if (ro && ro.disconnect) ro.disconnect();
+        });
+      })();
+    </script>
+
     <!-- Use relative path so Vite rewrites with correct base for GitHub Pages -->
     <script type="module" src="./src/main.tsx"></script>
   </body>

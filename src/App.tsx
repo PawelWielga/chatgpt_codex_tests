@@ -2,14 +2,6 @@
 import { SettingsProvider } from "@/settings/SettingsContext";
 import Desktop from "@/desktop/Desktop";
 import { WindowManager } from "@/window/WindowManager";
-/** Watermark text is intentionally static, minimal, and non-interactive */
-function Watermark(): React.ReactElement {
-  return (
-    <div className="watermark" aria-hidden="true">
-      Trial Mode: Construction Workers on Coffee Break
-    </div>
-  );
-}
 
 /**
  * Hook: Updates the #clock element textContent every second.
@@ -39,7 +31,6 @@ export default function App(): React.ReactElement {
     <SettingsProvider>
       <WindowManager>
         <Desktop />
-        <Watermark />
       </WindowManager>
     </SettingsProvider>
   );

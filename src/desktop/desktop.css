@@ -109,6 +109,58 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
   border-radius: var(--radius-1);
 }
 
+/* Trial banner: sits directly above the taskbar with consistent spacing */
+.trial-banner {
+  position: fixed;
+  left: env(safe-area-inset-left, 0);
+  right: env(safe-area-inset-right, 0);
+  bottom: calc(48px + var(--space-2)); /* 48px taskbar + spacing */
+  z-index: calc(var(--z-windows) + 1); /* above desktop content, below overlays */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-4);
+  margin: 0 auto;
+  max-width: min(960px, calc(100vw - 32px));
+  border-radius: var(--radius-2);
+  border: 1px solid rgba(255,255,255,0.22);
+  background: color-mix(in srgb, #0b0f19 80%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff;
+  font-weight: 700; /* bold for prominence and accessibility */
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: var(--shadow-1);
+  pointer-events: none; /* never obstruct taskbar interactions */
+}
+
+/* Ensure strong contrast and readable size */
+.trial-banner strong {
+  font-weight: 800;
+}
+
+/* Responsive typography */
+@media (min-width: 768px) {
+  .trial-banner { font-size: 14px; }
+}
+@media (max-width: 767.98px) {
+  .trial-banner {
+    font-size: 13px;
+    bottom: calc(48px + var(--space-2)); /* keep same spacing above taskbar */
+    left: var(--space-2);
+    right: var(--space-2);
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .trial-banner {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 /* Mobile tweaks */
 @media (max-width: 768px) {
   .desktop-grid {

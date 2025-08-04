@@ -8,7 +8,6 @@ import React, {
   useEffect,
 } from "react";
 import "./window.css";
-import { useWindowDrag } from "./hooks/useWindowDrag";
 import { useWindowResize } from "./hooks/useWindowResize";
 import { getWindowDefaults } from "./registry";
 
@@ -263,9 +262,22 @@ export function WindowManager({ children }: { children: React.ReactNode }): Reac
             onMaximize={maximizeToggle}
             onFocus={focus}
             onPatch={(patch) => {
+              // DIAG: log every position patch
+              if ("x" in patch || "y" in patch) {
+                // eslint-disable-next-line no-console
+                console.debug("[WM][patch] id=%s ->", w.id, { x: patch.x, y: patch.y });
+              }
               setWindows((prev) =>
                 prev.map((x) => (x.id === w.id ? { ...x, ...patch } : x))
               );
+              // Force immediate style sync for the active window to bypass any render delay
+              if (("x" in patch || "y" in patch)) {
+                const el = document.querySelector<HTMLElement>(`.window[aria-label="${w.title}"]`);
+                if (el) {
+                  if (typeof patch.x === "number") el.style.left = `${patch.x}px`;
+                  if (typeof patch.y === "number") el.style.top = `${patch.y}px`;
+                }
+              }
             }}
           />
         ))}
@@ -293,34 +305,16 @@ function WindowFrame(props: {
   const minWidth = w.minWidth ?? MIN_WIDTH_DEFAULT;
   const minHeight = w.minHeight ?? MIN_HEIGHT_DEFAULT;
 
-  // Drag hook
-  const drag = useWindowDrag(
-    (patch) => props.onPatch(patch),
-    () => ({
-      x: w.x,
-      y: w.y,
-      width: w.width,
-      height: w.height,
-    }),
-    () => ({ width: window.innerWidth, height: window.innerHeight })
-  );
-
-  // Resize hook
+  // Resize hook (kept)
   const resize = useWindowResize(
     (patch) => props.onPatch(patch),
     { minWidth, minHeight, maxWidth: w.maxWidth, maxHeight: w.maxHeight }
   );
 
-  useEffect(() => () => drag.onCleanup(), [drag]);
   useEffect(() => () => resize.onCleanup(), [resize]);
 
-  const onHeaderDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest(".window-controls")) return;
-    props.onFocus(w.id);
-    // Start dragging from current position
-    drag.onMouseDown(e, { x: w.x, y: w.y });
-    e.preventDefault();
-  };
+  // Dragging removed per request; keep ref for double-click maximize/focus only
+  const headerRef = React.useRef<HTMLDivElement | null>(null);
 
   const onResizeDown = (e: React.MouseEvent) => {
     props.onFocus(w.id);
@@ -336,6 +330,8 @@ function WindowFrame(props: {
     width: w.width,
     height: w.height,
     zIndex: w.z,
+    position: "absolute",
+    transform: "translateZ(0)",
   };
 
   const ariaModal = props.topMostId === w.id && w.maximized;
@@ -351,7 +347,7 @@ function WindowFrame(props: {
     >
       <div
         className="window-header"
-        onMouseDown={onHeaderDown}
+        ref={headerRef}
         onDoubleClick={() => props.onMaximize(w.id)}
         tabIndex={0}
       >
@@ -389,7 +385,6 @@ function WindowFrame(props: {
       </div>
       <div className="window-content">{w.content}</div>
       {
-        // Only show resizer when not maximized; add title for a11y discoverability
         !w.maximized && (
           <div
             className="window-resizer"

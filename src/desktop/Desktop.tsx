@@ -172,6 +172,15 @@ export default function Desktop(): React.ReactElement {
         ))}
       </div>
 
+      {/* Trial banner placed directly above taskbar with consistent spacing */}
+      <div
+        className="trial-banner"
+        role="status"
+        aria-live="polite"
+      >
+        <strong>Trial Mode:</strong> Construction Workers on Coffee Break
+      </div>
+
       <div className="taskbar" role="toolbar" aria-label="Taskbar">
         <button className="start-button" title="Start" type="button">⊞</button>
         <div className="taskbar-apps" role="group" aria-label="Open windows">
