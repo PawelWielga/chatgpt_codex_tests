@@ -1,0 +1,158 @@
+.ms-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #ffffff;
+  color: #222;
+  font-family: Segoe UI, Tahoma, sans-serif;
+}
+
+.ms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #e9ecef;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  padding: 8px 12px;
+}
+
+.ms-counter, .ms-timer {
+  background: #000;
+  color: #ff0000;
+  padding: 4px 8px;
+  font-family: "Courier New", monospace;
+  font-size: 16px;
+  border: 1px inset #c0c0c0;
+  min-width: 48px;
+  text-align: center;
+  border-radius: 2px;
+}
+
+.ms-reset {
+  width: 36px;
+  height: 36px;
+  background: #c0c0c0;
+  border: 2px outset #c0c0c0;
+  cursor: pointer;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: transform .08s ease;
+}
+.ms-reset:active {
+  border: 2px inset #c0c0c0;
+  transform: translateY(1px);
+}
+
+/* Remove gray background below the grid and mirror legacy chrome */
+.ms-grid {
+  flex: 1 1 auto;
+  padding: 12px;
+  display: grid;
+  gap: 1px;                /* legacy gap between tiles */
+  background: transparent; /* requested: no gray panel behind board */
+  width: fit-content;
+  margin: 0 auto;
+  border: none;            /* no top/bottom inset bars */
+  perspective: 700px;      /* enable 3D feel for flip ripple */
+}
+
+/* Tile look + subtle hover/press animation like legacy feel */
+.ms-cell {
+  width: 28px;
+  height: 28px;
+  background: #c0c0c0;           /* legacy base */
+  border: 2px outset #c0c0c0;    /* bevel */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  user-select: none;
+  color: #1b1f23;
+  line-height: 1;
+  transition: transform .08s ease, background-color .12s ease, border-color .12s ease;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+.ms-cell:hover:not(.revealed) {
+  transform: translateY(-1px);
+}
+.ms-cell:active:not(.revealed) {
+  transform: translateY(0);         /* press back */
+  border: 2px inset #c0c0c0;        /* pressed look */
+}
+
+/* Flip reveal animation (legacy-like) */
+@keyframes ms-flip {
+  0%   { transform: rotateX(0deg) scale(1); }
+  49%  { transform: rotateX(90deg) scale(0.98); }
+  50%  { transform: rotateX(-90deg) scale(0.98); }
+  100% { transform: rotateX(0deg) scale(1); }
+}
+
+/* Subtle pulse to enhance ripple feel */
+@keyframes ms-pulse {
+  0% { opacity: .85; }
+  60% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+/* Revealed tile */
+.ms-cell.revealed {
+  border: 1px solid #808080;
+  background: #f0f0f0;
+  transform: none;
+  animation: ms-flip .22s ease-out both;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+/* Wave ripple: these attributes are set from TS per click like legacy revealWave() */
+.ms-cell[data-wave] {
+  will-change: transform, opacity;
+  animation-name: ms-flip, ms-pulse;
+  animation-duration: .22s, .5s;
+  animation-timing-function: cubic-bezier(.2,.65,.3,1), ease-out;
+  animation-fill-mode: both, both;
+}
+
+/* distance-based stagger (60ms step as in legacy) */
+.ms-cell[data-wave][data-dist="0"] { animation-delay:   0ms,   0ms; }
+.ms-cell[data-wave][data-dist="1"] { animation-delay:  60ms,  60ms; }
+.ms-cell[data-wave][data-dist="2"] { animation-delay: 120ms, 120ms; }
+.ms-cell[data-wave][data-dist="3"] { animation-delay: 180ms, 180ms; }
+.ms-cell[data-wave][data-dist="4"] { animation-delay: 240ms, 240ms; }
+.ms-cell[data-wave][data-dist="5"] { animation-delay: 300ms, 300ms; }
+.ms-cell[data-wave][data-dist="6"] { animation-delay: 360ms, 360ms; }
+.ms-cell[data-wave][data-dist="7"] { animation-delay: 420ms, 420ms; }
+.ms-cell[data-wave][data-dist="8"] { animation-delay: 480ms, 480ms; }
+.ms-cell[data-wave][data-dist="9"] { animation-delay: 540ms, 540ms; }
+.ms-cell[data-wave][data-dist="10"] { animation-delay: 600ms, 600ms; }
+.ms-cell[data-wave][data-dist="11"] { animation-delay: 660ms, 660ms; }
+.ms-cell[data-wave][data-dist="12"] { animation-delay: 720ms, 720ms; }
+
+/* Flagged tile */
+.ms-cell.flagged {
+  background: #ffff00;
+}
+
+/* number coloring similar to classic minesweeper */
+.ms-cell.revealed.n1 { color: #0000ff; }
+.ms-cell.revealed.n2 { color: #008000; }
+.ms-cell.revealed.n3 { color: #ff0000; }
+.ms-cell.revealed.n4 { color: #000080; }
+.ms-cell.revealed.n5 { color: #800000; }
+.ms-cell.revealed.n6 { color: #008080; }
+.ms-cell.revealed.n7 { color: #000000; }
+.ms-cell.revealed.n8 { color: #7f7f7f; }
+
+.ms-footer {
+  padding: 8px 12px;
+  background: #f7f7f7;
+  font-size: 12px;
+  color: #444;
+}

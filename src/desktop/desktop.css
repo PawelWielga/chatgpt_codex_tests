@@ -1,0 +1,112 @@
+/* Wallpaper background */
+html, body, #root { height: 100%; }
+body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+.desktop-root {
+  min-height: 100%;
+  background: url('/legacy_backup/wallpapers/forest.jpg') no-repeat center center fixed;
+  background-size: cover;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Desktop grid like Windows */
+.desktop-grid {
+  height: calc(100vh - 48px);
+  position: relative;
+  padding: 20px;
+  display: grid;
+  /* Strict single column so next icon is directly under the previous one. */
+  grid-template-columns: 80px;
+  grid-auto-rows: 100px;
+  gap: 20px;
+  align-content: start;
+  justify-content: start;
+}
+
+/* Icons */
+.desktop-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform .15s ease, background .2s ease;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+}
+.desktop-icon:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
+.desktop-icon::before {
+  content: attr(data-icon);
+  font-size: 32px;
+  color: #fff;
+}
+.icon-label {
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0,0,0,.5);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Taskbar */
+.taskbar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 48px;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  display: flex; align-items: center; justify-content: center;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  z-index: 2000;
+}
+.start-button {
+  width: 48px; height: 48px;
+  background: transparent; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: #fff;
+  position: absolute; left: 8px;
+}
+.start-button:hover { background: rgba(255,255,255,0.1); }
+.taskbar-apps { display: flex; align-items: center; gap: 6px; margin-left: 64px; }
+.taskbar-btn {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  cursor: pointer;
+}
+.taskbar-btn:hover {
+  background: rgba(255,255,255,0.18);
+}
+.system-tray { position: absolute; right: 8px; display: flex; gap: 8px; color: #fff; font-size: 13px; }
+
+.clock { min-width: 40px; text-align: right; }
+
+/* Mobile tweaks */
+@media (max-width: 768px) {
+  .desktop-grid {
+    padding: 10px;
+    /* Keep single column on mobile as well */
+    grid-template-columns: 72px;
+    grid-auto-rows: 92px;
+    gap: 12px;
+  }
+}

@@ -1,0 +1,70 @@
+# Node dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.*.local
+
+# Coverage and test artifacts
+coverage/
+.nyc_output/
+jest-html-reporters-*.html
+test-results/
+
+# Cache directories
+.cache/
+.tmp/
+temp/
+
+# Lockfiles (keep the one you use)
+# Uncomment to ignore others if needed
+# yarn.lock
+# pnpm-lock.yaml
+# package-lock.json
+
+# Local netlify/vercel config artifacts
+.netlify/
+.vercel/
+
+# Storybook/Playwright/Cypress (if added later)
+storybook-static/
+playwright-report/
+test-results/
+cypress/videos/
+cypress/screenshots/
+
+# Misc
+*.local
+*.iml
+
+# Keep legacy backups tracked (do not ignore)
+# (Explicitly negating just in case a broader pattern is added later)
+!legacy_backup/
